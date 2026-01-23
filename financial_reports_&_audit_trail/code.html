@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Financial Reports &amp; Audit Trail | EduPay Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1b2b4b",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#14171e",
+                        "accent-success": "#07883b",
+                        "accent-error": "#e73908",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Lexend', sans-serif;
+        }
+        .audit-line {
+            border-left: 2px dashed #d5d9e2;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-[#111318] antialiased">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- Top Navigation Bar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#eaecf1] bg-white dark:bg-background-dark px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary dark:text-white">
+<div class="size-6">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z" fill="currentColor"></path>
+</svg>
+</div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">EduPay Ledger</h2>
+</div>
+<nav class="flex items-center gap-6">
+<a class="text-[#5d6b89] hover:text-primary dark:text-gray-400 text-sm font-medium leading-normal" href="#">Dashboard</a>
+<a class="text-primary dark:text-white border-b-2 border-primary text-sm font-bold leading-normal pb-1" href="#">Reports</a>
+<a class="text-[#5d6b89] hover:text-primary dark:text-gray-400 text-sm font-medium leading-normal" href="#">Audit Trail</a>
+<a class="text-[#5d6b89] hover:text-primary dark:text-gray-400 text-sm font-medium leading-normal" href="#">Settings</a>
+</nav>
+</div>
+<div class="flex flex-1 justify-end gap-6 items-center">
+<div class="flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full border border-green-200">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span class="text-xs font-bold uppercase tracking-wider">Stellar Verified</span>
+</div>
+<label class="flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-[#5d6b89] flex border-none bg-[#eaecf1] items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111318] focus:outline-0 focus:ring-0 border-none bg-[#eaecf1] focus:border-none h-full placeholder:text-[#5d6b89] px-4 rounded-l-none border-l-0 pl-2 text-sm font-normal" placeholder="Search students, receipts..." value=""/>
+</div>
+</label>
+<div class="flex gap-2">
+<button class="flex items-center justify-center rounded-lg h-10 w-10 bg-[#eaecf1] text-[#111318]">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-[#d5d9e2]" data-alt="Bursar profile picture avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBMKwcfgYyKGuGv9eDiVN3Hf0aFsFKlfiVfZQZBHFFlfKsFKXGHM2jfFSZG6JsB-zKX0XUOBIYVsjoEIrmuRpyTUAhL1ugzHSKIl61_Rd5OY-Aob8elZH7cz2pXJOOjaZ74j-usXpgPH3rz1em1S-FryuCzfLlGRyz_wNcfhWK6L9usrty-4wJG2wocbGQNFw2sPODIjnHk-aZP_VjaE3f4ZVIY7yLBl7juCTllDztlmFlurfMzp35X3mKbBfgRFvXP4KDtGbBTAt4");'></div>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center pb-12">
+<div class="w-full max-w-[1280px] px-6 lg:px-10 mt-8">
+<!-- Page Heading -->
+<div class="flex flex-wrap justify-between items-end gap-4 mb-8">
+<div class="flex flex-col gap-2">
+<h1 class="text-primary dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">Financial Reports &amp; Audit Trail</h1>
+<p class="text-[#5d6b89] dark:text-gray-400 text-base font-normal">Trust-verified fee reconciliation and immutable Stellar ledger logs for Term II, 2024.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-11 px-5 bg-[#eaecf1] text-[#111318] text-sm font-bold hover:bg-[#d5d9e2] transition-colors gap-2">
+<span class="material-symbols-outlined text-[20px]">file_download</span>
+<span>Export Reports</span>
+</button>
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-11 px-5 bg-primary text-white text-sm font-bold hover:bg-[#2a3f6b] transition-colors gap-2">
+<span class="material-symbols-outlined text-[20px]">print</span>
+<span>Print Summary</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-12 gap-6">
+<!-- Left Column: Main Dashboard -->
+<div class="col-span-12 lg:col-span-8 flex flex-col gap-6">
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-background-dark border border-[#d5d9e2] dark:border-gray-800 shadow-sm">
+<p class="text-[#5d6b89] text-sm font-medium">Total Collected</p>
+<p class="text-[#111318] dark:text-white tracking-tight text-2xl font-black">UGX 150.2M</p>
+<div class="flex items-center gap-1 text-accent-success text-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>+12.4%</span>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-background-dark border border-[#d5d9e2] dark:border-gray-800 shadow-sm">
+<p class="text-[#5d6b89] text-sm font-medium">Outstanding Balance</p>
+<p class="text-[#111318] dark:text-white tracking-tight text-2xl font-black">UGX 45.8M</p>
+<div class="flex items-center gap-1 text-accent-error text-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">trending_down</span>
+<span>-5.2%</span>
+</div>
+</div>
+<div class="flex flex-col gap-2 rounded-xl p-6 bg-white dark:bg-background-dark border border-[#d5d9e2] dark:border-gray-800 shadow-sm">
+<p class="text-[#5d6b89] text-sm font-medium">Collection Efficiency</p>
+<p class="text-[#111318] dark:text-white tracking-tight text-2xl font-black">76.5%</p>
+<div class="flex items-center gap-1 text-accent-success text-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span>+3.1%</span>
+</div>
+</div>
+</div>
+<!-- Chart Section -->
+<div class="flex flex-col gap-4 rounded-xl border border-[#d5d9e2] dark:border-gray-800 bg-white dark:bg-background-dark p-6 shadow-sm">
+<div class="flex justify-between items-start">
+<div>
+<p class="text-primary dark:text-white text-lg font-bold">Fee Collection Trend</p>
+<p class="text-[#5d6b89] text-sm">Monthly collection velocity (UGX Millions)</p>
+</div>
+<div class="flex bg-[#eaecf1] rounded-lg p-1">
+<button class="px-3 py-1 text-xs font-bold bg-white rounded shadow-sm">Termly</button>
+<button class="px-3 py-1 text-xs font-medium text-[#5d6b89]">Yearly</button>
+</div>
+</div>
+<div class="flex min-h-[200px] flex-col gap-8 py-4">
+<svg fill="none" height="160" preserveaspectratio="none" viewbox="-3 0 478 150" width="100%" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25V149H326.769H0V109Z" fill="url(#paint0_linear_chart)"></path>
+<path d="M0 109C18.1538 109 18.1538 21 36.3077 21C54.4615 21 54.4615 41 72.6154 41C90.7692 41 90.7692 93 108.923 93C127.077 93 127.077 33 145.231 33C163.385 33 163.385 101 181.538 101C199.692 101 199.692 61 217.846 61C236 61 236 45 254.154 45C272.308 45 272.308 121 290.462 121C308.615 121 308.615 149 326.769 149C344.923 149 344.923 1 363.077 1C381.231 1 381.231 81 399.385 81C417.538 81 417.538 129 435.692 129C453.846 129 453.846 25 472 25" stroke="#1b2b4b" stroke-linecap="round" stroke-width="3"></path>
+<defs>
+<lineargradient gradientunits="userSpaceOnUse" id="paint0_linear_chart" x1="236" x2="236" y1="1" y2="149">
+<stop stop-color="#1b2b4b" stop-opacity="0.2"></stop>
+<stop offset="1" stop-color="#1b2b4b" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="flex justify-between px-2">
+<p class="text-[#5d6b89] text-[12px] font-bold">MAY</p>
+<p class="text-[#5d6b89] text-[12px] font-bold">JUN</p>
+<p class="text-[#5d6b89] text-[12px] font-bold">JUL</p>
+<p class="text-[#5d6b89] text-[12px] font-bold">AUG</p>
+<p class="text-[#5d6b89] text-[12px] font-bold">SEP</p>
+<p class="text-[#5d6b89] text-[12px] font-bold">OCT</p>
+</div>
+</div>
+</div>
+<!-- Data Table with Tabs -->
+<div class="flex flex-col rounded-xl border border-[#d5d9e2] dark:border-gray-800 bg-white dark:bg-background-dark shadow-sm overflow-hidden">
+<div class="border-b border-[#d5d9e2] dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50">
+<div class="flex px-4 gap-8">
+<a class="flex flex-col items-center justify-center border-b-[3px] border-primary text-primary pb-[13px] pt-4" href="#">
+<p class="text-sm font-bold tracking-[0.015em]">Students</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-[#5d6b89] pb-[13px] pt-4 hover:text-primary transition-colors" href="#">
+<p class="text-sm font-bold tracking-[0.015em]">Classes</p>
+</a>
+<a class="flex flex-col items-center justify-center border-b-[3px] border-transparent text-[#5d6b89] pb-[13px] pt-4 hover:text-primary transition-colors" href="#">
+<p class="text-sm font-bold tracking-[0.015em]">Terms</p>
+</a>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-gray-50 dark:bg-gray-900/30">
+<th class="px-6 py-4 text-xs font-bold text-[#5d6b89] uppercase tracking-wider">Student Name</th>
+<th class="px-6 py-4 text-xs font-bold text-[#5d6b89] uppercase tracking-wider">Reg ID</th>
+<th class="px-6 py-4 text-xs font-bold text-[#5d6b89] uppercase tracking-wider">Class</th>
+<th class="px-6 py-4 text-xs font-bold text-[#5d6b89] uppercase tracking-wider">Total Paid</th>
+<th class="px-6 py-4 text-xs font-bold text-[#5d6b89] uppercase tracking-wider">Balance</th>
+<th class="px-6 py-4 text-xs font-bold text-[#5d6b89] uppercase tracking-wider">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#eaecf1] dark:divide-gray-800">
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">NK</div>
+<span class="font-medium">Namuli Kevin</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm">2024/P4/001</td>
+<td class="px-6 py-4 text-sm">Primary 4</td>
+<td class="px-6 py-4 text-sm font-bold">850,000</td>
+<td class="px-6 py-4 text-sm text-accent-success font-medium">Clear</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700">Verified</span>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">OO</div>
+<span class="font-medium">Okello Oscar</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm">2024/S1/142</td>
+<td class="px-6 py-4 text-sm">Senior 1</td>
+<td class="px-6 py-4 text-sm font-bold">1,200,000</td>
+<td class="px-6 py-4 text-sm text-accent-error font-medium">350,000</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-yellow-100 text-yellow-700">Pending</span>
+</td>
+</tr>
+<tr class="hover:bg-gray-50 dark:hover:bg-gray-900/20 transition-colors">
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">MA</div>
+<span class="font-medium">Mirembe Aisha</span>
+</div>
+</td>
+<td class="px-6 py-4 text-sm">2024/P2/089</td>
+<td class="px-6 py-4 text-sm">Primary 2</td>
+<td class="px-6 py-4 text-sm font-bold">780,000</td>
+<td class="px-6 py-4 text-sm text-accent-success font-medium">Clear</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center px-2 py-1 rounded text-xs font-bold bg-green-100 text-green-700">Verified</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 border-t border-[#d5d9e2] dark:border-gray-800 flex justify-center">
+<button class="text-primary font-bold text-sm hover:underline">View All Students</button>
+</div>
+</div>
+</div>
+<!-- Right Column: Audit Trail Sidebar -->
+<div class="col-span-12 lg:col-span-4 flex flex-col gap-6">
+<div class="rounded-xl border border-[#d5d9e2] dark:border-gray-800 bg-white dark:bg-background-dark p-6 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">history_edu</span>
+<h3 class="text-lg font-bold">Stellar Audit Log</h3>
+</div>
+<span class="material-symbols-outlined text-[#5d6b89] cursor-pointer">info</span>
+</div>
+<div class="audit-line pl-6 flex flex-col gap-8">
+<!-- Audit Event 1 -->
+<div class="relative">
+<div class="absolute -left-[31px] top-0 h-4 w-4 rounded-full bg-primary border-4 border-white dark:border-background-dark"></div>
+<div class="flex flex-col gap-1">
+<p class="text-sm font-bold">Fee Receipt #RCP-9021</p>
+<p class="text-xs text-[#5d6b89]">Student: Namuli Kevin</p>
+<div class="flex items-center gap-2 mt-2 bg-gray-50 dark:bg-gray-900 p-2 rounded border border-dashed border-gray-200">
+<span class="material-symbols-outlined text-[14px] text-green-600">anchor</span>
+<span class="text-[10px] font-mono text-gray-500 truncate">SHA-256: 4f3a...b8e2</span>
+</div>
+<p class="text-[10px] text-[#5d6b89] font-medium uppercase mt-1">Oct 12, 2024 • 14:32:01</p>
+</div>
+</div>
+<!-- Audit Event 2 -->
+<div class="relative">
+<div class="absolute -left-[31px] top-0 h-4 w-4 rounded-full bg-gray-300 border-4 border-white dark:border-background-dark"></div>
+<div class="flex flex-col gap-1">
+<p class="text-sm font-bold">Class Arrears Updated</p>
+<p class="text-xs text-[#5d6b89]">Class: Senior 1 (Term II)</p>
+<div class="flex items-center gap-2 mt-2 bg-gray-50 dark:bg-gray-900 p-2 rounded border border-dashed border-gray-200">
+<span class="material-symbols-outlined text-[14px] text-green-600">anchor</span>
+<span class="text-[10px] font-mono text-gray-500 truncate">SHA-256: 8a92...cc31</span>
+</div>
+<p class="text-[10px] text-[#5d6b89] font-medium uppercase mt-1">Oct 11, 2024 • 09:15:44</p>
+</div>
+</div>
+<!-- Audit Event 3 -->
+<div class="relative">
+<div class="absolute -left-[31px] top-0 h-4 w-4 rounded-full bg-gray-300 border-4 border-white dark:border-background-dark"></div>
+<div class="flex flex-col gap-1">
+<p class="text-sm font-bold">System Integrity Check</p>
+<p class="text-xs text-[#5d6b89]">Ledger reconciliation success</p>
+<div class="flex items-center gap-2 mt-2 bg-gray-50 dark:bg-gray-900 p-2 rounded border border-dashed border-gray-200">
+<span class="material-symbols-outlined text-[14px] text-green-600">anchor</span>
+<span class="text-[10px] font-mono text-gray-500 truncate">SHA-256: 1f0e...d772</span>
+</div>
+<p class="text-[10px] text-[#5d6b89] font-medium uppercase mt-1">Oct 10, 2024 • 18:00:00</p>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 flex items-center justify-center gap-2 rounded-lg py-3 bg-gray-50 dark:bg-gray-900 text-xs font-bold text-primary border border-gray-200 hover:bg-gray-100 transition-colors">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+                                Verify Complete History
+                            </button>
+</div>
+<!-- Quick Actions / Export Options -->
+<div class="rounded-xl bg-primary p-6 text-white shadow-lg">
+<h3 class="text-lg font-bold mb-4">Export Summary</h3>
+<div class="flex flex-col gap-3">
+<button class="flex items-center gap-3 w-full p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-left">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+<div>
+<p class="text-sm font-bold leading-none">Bursar's Report</p>
+<p class="text-[11px] opacity-70">Complete PDF summary</p>
+</div>
+</button>
+<button class="flex items-center gap-3 w-full p-3 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-left">
+<span class="material-symbols-outlined">table_chart</span>
+<div>
+<p class="text-sm font-bold leading-none">Arrears Excel</p>
+<p class="text-[11px] opacity-70">Financial spreadsheet</p>
+</div>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="mt-12 border-t border-[#eaecf1] bg-white dark:bg-background-dark px-10 py-6">
+<div class="flex flex-wrap justify-between items-center gap-4">
+<div class="flex items-center gap-4">
+<div class="size-4">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 4H17.3334V17.3334H30.6666V30.6666H44V44H4V4Z" fill="#1b2b4b"></path>
+</svg>
+</div>
+<p class="text-xs text-[#5d6b89]">© 2024 EduPay Ledger Systems Uganda. All transactions secured by Stellar Blockchain anchor.</p>
+</div>
+<div class="flex gap-6">
+<a class="text-xs text-[#5d6b89] hover:text-primary" href="#">Help Center</a>
+<a class="text-xs text-[#5d6b89] hover:text-primary" href="#">Data Security</a>
+<a class="text-xs text-[#5d6b89] hover:text-primary" href="#">Audit Policy</a>
+</div>
+</div>
+</footer>
+</div>
+</div>
+</body></html>

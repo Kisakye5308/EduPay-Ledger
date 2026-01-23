@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Financial Profile | EduPay Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1b2b4b",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#14171e",
+                        "success": "#10b981",
+                        "warning": "#f59e0b",
+                        "danger": "#ef4444"
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body { font-family: 'Lexend', sans-serif; }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-800 dark:text-slate-200 min-h-screen">
+<!-- Navigation Bar -->
+<nav class="bg-primary text-white py-4 px-8 flex justify-between items-center sticky top-0 z-50 shadow-md">
+<div class="flex items-center gap-3">
+<div class="bg-white/10 p-2 rounded-lg">
+<span class="material-icons text-white">account_balance</span>
+</div>
+<span class="font-bold text-xl tracking-tight">EduPay Ledger</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4 text-sm font-medium">
+<a class="hover:text-blue-300" href="#">Dashboard</a>
+<a class="text-blue-300 border-b-2 border-blue-300 pb-1" href="#">Students</a>
+<a class="hover:text-blue-300" href="#">Reports</a>
+</div>
+<div class="flex items-center gap-3 border-l border-white/20 pl-6">
+<div class="text-right hidden sm:block">
+<p class="text-xs font-light opacity-80">Bursar Office</p>
+<p class="text-sm font-semibold">Kampala Central High</p>
+</div>
+<img alt="Profile" class="w-10 h-10 rounded-full border-2 border-white/20" data-alt="Bursar profile headshot photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCAYPdUdwGHyFSrNm8baRbHW19QP4rn6puAUZtsi-Z3CcTLzmsK0c15R6G8p69SixXX7BO5dO1nsxAx1k1TgIC9YhrVPGZuk8-T9WtK_ukv_MDL4ErqP7hxDnb4aawX5bm11qRHIfnkSKoN4IjkLjllDNdXadZLiUuBc9O1Wf8fsPGCtH0mQbap_KtiBSpneBeWeG6DoLUK6xBU7tuGJN_VVTFdOr7tjQWs639bug0zIXEtM9iVmx1xfhgJO3Hs3gvrR0Ju98ZU5js"/>
+</div>
+</div>
+</nav>
+<main class="max-w-7xl mx-auto p-6 md:p-8 space-y-8">
+<!-- Breadcrumbs & Actions Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+<div>
+<nav class="flex text-sm text-slate-500 mb-2">
+<a class="hover:text-primary dark:hover:text-white" href="#">Directory</a>
+<span class="mx-2">/</span>
+<span class="text-primary dark:text-white font-medium">Student Profile</span>
+</nav>
+<h1 class="text-2xl font-bold flex items-center gap-2">
+                    Financial Record Detail
+                    <span class="bg-success/10 text-success text-[10px] uppercase px-2 py-0.5 rounded-full font-bold border border-success/20">Active</span>
+</h1>
+</div>
+<div class="flex gap-3">
+<button class="bg-primary/10 hover:bg-primary/20 text-primary dark:text-blue-300 px-4 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all">
+<span class="material-icons text-sm">sms</span>
+                    Send Receipt SMS
+                </button>
+<button class="bg-primary hover:bg-slate-800 text-white px-6 py-2.5 rounded-lg font-semibold flex items-center gap-2 shadow-lg shadow-primary/20 transition-all">
+<span class="material-icons text-sm">add_card</span>
+                    Record Payment
+                </button>
+</div>
+</div>
+<!-- Student Profile Card -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 shadow-sm overflow-hidden relative">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-full -mr-8 -mt-8 pointer-events-none"></div>
+<div class="flex flex-col md:flex-row gap-8 items-start md:items-center">
+<div class="flex-shrink-0">
+<img alt="Student Photo" class="w-24 h-24 rounded-xl object-cover ring-4 ring-slate-50 dark:ring-slate-800 shadow-sm" data-alt="Student identification portrait photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0CnWYOn8jgUsEOhUTX7qeTe9V1C0bEWnzP9LGgDmV9isuZqckxogBtA06czEVBCXtb4FHQFSCIxjsRJ0oDLM_1gbq8L72FBxdMZJqnY12IBgQxEk9qy6mT1EynTF8w-DYpnctJon298ne5QMe1UEuPIlOdD__r6bx71PWNeAV5rbJVe1wPGSTAvxKyJXhlGqJMCEHpuszOMeLCAPlz72rPiGcga82FNaeEkaZKXbI5V_VTuG1pxGB_Jq3ZRhiP1ppeLE77VQct5s"/>
+</div>
+<div class="flex-grow grid grid-cols-1 md:grid-cols-3 gap-6">
+<div>
+<p class="text-xs uppercase tracking-wider text-slate-400 font-bold mb-1">Student Name</p>
+<h2 class="text-xl font-bold text-primary dark:text-white">Mugisha Ivan Brian</h2>
+<p class="text-sm text-slate-500 mt-1">ID: EDU-2023-045-KC</p>
+</div>
+<div>
+<p class="text-xs uppercase tracking-wider text-slate-400 font-bold mb-1">Academic Info</p>
+<p class="text-slate-700 dark:text-slate-300 font-medium">Senior 4 • East Wing</p>
+<p class="text-sm text-slate-500 mt-1">Term 2, 2024</p>
+</div>
+<div>
+<p class="text-xs uppercase tracking-wider text-slate-400 font-bold mb-1">Guardian Contact</p>
+<p class="text-slate-700 dark:text-slate-300 font-medium">Mrs. Sarah Namugisha</p>
+<p class="text-sm text-primary dark:text-blue-400 font-semibold flex items-center gap-1">
+<span class="material-icons text-xs">phone</span>
+                            +256 772 456 789
+                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Fee Summary Section -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Summary Card 1: Total Fees -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+<span class="material-icons text-primary dark:text-blue-400">receipt_long</span>
+</div>
+<span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Total Invoiced</span>
+</div>
+<p class="text-sm text-slate-500">Term Total Fees</p>
+<h3 class="text-2xl font-bold mt-1">UGX 1,450,000</h3>
+<div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs text-slate-500">
+                    Includes Tuition, Lab, &amp; Uniform fees
+                </div>
+</div>
+<!-- Summary Card 2: Amount Paid -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-success/10 rounded-lg">
+<span class="material-icons text-success">check_circle</span>
+</div>
+<span class="text-[10px] font-bold text-success uppercase tracking-tighter">Verified Payments</span>
+</div>
+<p class="text-sm text-slate-500">Amount Paid to Date</p>
+<h3 class="text-2xl font-bold mt-1 text-success">UGX 850,000</h3>
+<div class="mt-4">
+<div class="flex justify-between text-xs mb-1.5 font-medium">
+<span>Progress (58%)</span>
+<span class="text-success">UGX 600,000 to go</span>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
+<div class="bg-success h-full" style="width: 58%"></div>
+</div>
+</div>
+</div>
+<!-- Summary Card 3: Balance -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-xl shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-warning/10 rounded-lg">
+<span class="material-icons text-warning">pending_actions</span>
+</div>
+<span class="text-[10px] font-bold text-warning uppercase tracking-tighter">Outstanding Balance</span>
+</div>
+<p class="text-sm text-slate-500">Amount Remaining</p>
+<h3 class="text-2xl font-bold mt-1 text-warning">UGX 600,000</h3>
+<div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+<span class="text-xs text-slate-500 italic">Deadline: 15 Oct 2024</span>
+<span class="material-icons text-warning text-sm">info</span>
+</div>
+</div>
+</div>
+<!-- Payment History Table -->
+<div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
+<div class="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
+<h3 class="text-lg font-bold text-primary dark:text-white">Transaction Logs</h3>
+<div class="flex gap-2">
+<div class="relative">
+<span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">search</span>
+<input class="pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-full md:w-64" placeholder="Search logs..." type="text"/>
+</div>
+<button class="p-2 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100">
+<span class="material-icons text-slate-600 text-sm">filter_list</span>
+</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead class="bg-slate-50 dark:bg-slate-800/50 text-slate-500 text-xs font-bold uppercase tracking-wider">
+<tr>
+<th class="px-6 py-4">Transaction Date</th>
+<th class="px-6 py-4">Ref ID</th>
+<th class="px-6 py-4">Payment Channel</th>
+<th class="px-6 py-4">Amount</th>
+<th class="px-6 py-4">Status</th>
+<th class="px-6 py-4 text-right">Action</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+<!-- Row 1 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="px-6 py-4">
+<p class="text-sm font-semibold">Sep 12, 2024</p>
+<p class="text-[10px] text-slate-400">02:45 PM</p>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">TX-8829-MO</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-yellow-400/10 flex items-center justify-center">
+<span class="material-icons text-yellow-600 text-sm">smartphone</span>
+</div>
+<span class="text-sm font-medium">MTN MoMo</span>
+</div>
+</td>
+<td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">UGX 450,000</td>
+<td class="px-6 py-4">
+<span class="bg-success/10 text-success text-[10px] uppercase font-bold px-2.5 py-1 rounded-full border border-success/20">Cleared</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary dark:text-blue-400 hover:bg-primary/5 p-1.5 rounded-lg">
+<span class="material-icons text-sm">print</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="px-6 py-4">
+<p class="text-sm font-semibold">Aug 05, 2024</p>
+<p class="text-[10px] text-slate-400">10:15 AM</p>
+</td>
+<td class="px-6 py-4">
+<span class="text-xs font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">BNK-3341-ST</span>
+</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-blue-100 flex items-center justify-center text-blue-700">
+<span class="material-icons text-sm">account_balance</span>
+</div>
+<span class="text-sm font-medium">Stanbic Bank</span>
+</div>
+</td>
+<td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">UGX 400,000</td>
+<td class="px-6 py-4">
+<span class="bg-success/10 text-success text-[10px] uppercase font-bold px-2.5 py-1 rounded-full border border-success/20">Cleared</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-primary dark:text-blue-400 hover:bg-primary/5 p-1.5 rounded-lg">
+<span class="material-icons text-sm">print</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 (Pending State Example) -->
+<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+<td class="px-6 py-4 opacity-60">
+<p class="text-sm font-semibold">Jul 20, 2024</p>
+<p class="text-[10px] text-slate-400">04:30 PM</p>
+</td>
+<td class="px-6 py-4 opacity-60">
+<span class="text-xs font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">CSH-1022-DR</span>
+</td>
+<td class="px-6 py-4 opacity-60">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center text-slate-600">
+<span class="material-icons text-sm">payments</span>
+</div>
+<span class="text-sm font-medium">Direct Cash</span>
+</div>
+</td>
+<td class="px-6 py-4 font-bold text-slate-400">UGX 100,000</td>
+<td class="px-6 py-4">
+<span class="bg-danger/10 text-danger text-[10px] uppercase font-bold px-2.5 py-1 rounded-full border border-danger/20">Reversed</span>
+</td>
+<td class="px-6 py-4 text-right">
+<button class="text-slate-400 hover:bg-slate-100 p-1.5 rounded-lg">
+<span class="material-icons text-sm">info_outline</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-slate-50 dark:bg-slate-800/30 flex justify-between items-center text-xs text-slate-500">
+<span>Showing 3 transactions</span>
+<div class="flex gap-2">
+<button class="px-3 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded shadow-sm opacity-50 cursor-not-allowed">Previous</button>
+<button class="px-3 py-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded shadow-sm hover:bg-slate-50">Next</button>
+</div>
+</div>
+</div>
+<!-- System Status Bar -->
+<footer class="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-400">
+<div class="flex items-center gap-4">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+                    Bank Gateway Active
+                </span>
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-success"></span>
+                    SMS Gateway Online
+                </span>
+</div>
+<p>© 2024 EduPay Ledger Uganda. Built for Security &amp; Trust.</p>
+</footer>
+</main>
+</body></html>

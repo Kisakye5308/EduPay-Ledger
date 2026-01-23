@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Student Directory &amp; Status | EduPay Ledger</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&amp;family=Noto+Sans:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#1b2b4b",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#14171e",
+                        "status-green": "#10b981",
+                        "status-yellow": "#f59e0b",
+                        "status-red": "#ef4444",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend"],
+                        "sans": ["Noto Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-[#111318] antialiased">
+<div class="relative flex h-auto min-h-screen w-full flex-col overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<!-- TopNavBar Component -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-[#eaecf1] dark:border-gray-800 bg-white dark:bg-background-dark px-10 py-3 sticky top-0 z-50">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-3 text-primary dark:text-white">
+<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined">account_balance</span>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-tight">EduPay Ledger</h2>
+</div>
+<label class="flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-[#5d6b89] flex border-none bg-[#eaecf1] dark:bg-gray-800 items-center justify-center pl-4 rounded-l-lg">
+<span class="material-symbols-outlined text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 border-none bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white focus:ring-0 h-full placeholder:text-[#5d6b89] px-4 rounded-r-lg pl-2 text-base font-normal leading-normal" placeholder="Search Student or ID..." value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8 items-center">
+<nav class="hidden lg:flex items-center gap-9">
+<a class="text-[#111318] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Dashboard</a>
+<a class="text-primary dark:text-white text-sm font-bold leading-normal border-b-2 border-primary" href="#">Students</a>
+<a class="text-[#111318] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Fees</a>
+<a class="text-[#111318] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Reports</a>
+<a class="text-[#111318] dark:text-gray-300 text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Settings</a>
+</nav>
+<div class="flex items-center gap-4">
+<button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-wide">
+<span class="truncate">Logout</span>
+</button>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border border-gray-200" data-alt="Bursar profile picture avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDgFkNjCuPv_An1_bFHqloEQStAoxIOyGUHni7R06plkFecUznEZYR92v8NmK9xvVLEJwg1UwOQvCrjrlU1IKzvTvopq_QMdP0IH2zjrGuAi_LMxqCAIGlSpfXea2JlUfwTsTSs-_l3G7SqpPLFES7j2zhwZrF8yX7ItA7t2wIM-0C0IokmJJwfCCi4A0_pC92LugLjQKizjx7G1rkfaNAS7sqiIzdeWutwDMG-e2BVUmKXjmiVvQS7jVhVDp7HoHygCP9Sh7Dtpnc");'></div>
+</div>
+</div>
+</header>
+<main class="flex flex-1 justify-center py-8">
+<div class="layout-content-container flex flex-col max-w-[1200px] w-full px-6">
+<!-- PageHeading Component -->
+<div class="flex flex-wrap justify-between items-end gap-3 mb-6">
+<div class="flex min-w-72 flex-col gap-1">
+<p class="text-[#111318] dark:text-white text-4xl font-black leading-tight tracking-tight">Student Directory</p>
+<p class="text-[#5d6b89] dark:text-gray-400 text-base font-normal leading-normal">Manage and track fee payments for 1,240 students in the system</p>
+</div>
+<div class="flex gap-3">
+<button class="flex min-w-[120px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-11 px-5 bg-white border border-gray-300 dark:border-gray-700 text-primary dark:text-white text-sm font-bold leading-normal shadow-sm">
+<span class="material-symbols-outlined text-xl">download</span>
+<span class="truncate">Export Data</span>
+</button>
+<button class="flex min-w-[140px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-11 px-5 bg-primary text-white text-sm font-bold leading-normal shadow-md">
+<span class="material-symbols-outlined text-xl">person_add</span>
+<span class="truncate">Add Student</span>
+</button>
+</div>
+</div>
+<!-- Chips / Filter Section -->
+<div class="bg-white dark:bg-background-dark border border-[#eaecf1] dark:border-gray-800 rounded-xl p-4 mb-6 shadow-sm">
+<div class="flex items-center gap-3 mb-3">
+<span class="material-symbols-outlined text-[#5d6b89]">filter_list</span>
+<span class="text-sm font-semibold text-[#5d6b89] uppercase tracking-wider">Quick Filters</span>
+</div>
+<div class="flex gap-3 flex-wrap">
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#eaecf1] dark:bg-gray-800 pl-4 pr-3 border border-transparent hover:border-primary/30 transition-all">
+<p class="text-[#111318] dark:text-white text-sm font-medium leading-normal">Class: All</p>
+<span class="material-symbols-outlined text-lg">expand_more</span>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#eaecf1] dark:bg-gray-800 pl-4 pr-3 border border-transparent hover:border-primary/30 transition-all">
+<p class="text-[#111318] dark:text-white text-sm font-medium leading-normal">Stream: All</p>
+<span class="material-symbols-outlined text-lg">expand_more</span>
+</button>
+<button class="flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg bg-[#eaecf1] dark:bg-gray-800 pl-4 pr-3 border border-transparent hover:border-primary/30 transition-all">
+<p class="text-[#111318] dark:text-white text-sm font-medium leading-normal">Balance Status: All</p>
+<span class="material-symbols-outlined text-lg">expand_more</span>
+</button>
+<div class="h-10 w-px bg-gray-200 dark:bg-gray-700 mx-2"></div>
+<button class="flex h-10 shrink-0 items-center justify-center px-4 rounded-lg text-primary dark:text-gray-300 text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800">
+                                Reset Filters
+                            </button>
+</div>
+</div>
+<!-- Table Component -->
+<div class="bg-white dark:bg-background-dark rounded-xl border border-[#d5d9e2] dark:border-gray-800 shadow-sm overflow-hidden">
+<div class="@container overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-gray-50 dark:bg-gray-900/50 border-b border-[#d5d9e2] dark:border-gray-800">
+<th class="px-6 py-4 text-[#111318] dark:text-white text-sm font-bold leading-normal uppercase tracking-wider">Student Name &amp; ID</th>
+<th class="px-6 py-4 text-[#111318] dark:text-white text-sm font-bold leading-normal uppercase tracking-wider">Class / Stream</th>
+<th class="px-6 py-4 text-[#111318] dark:text-white text-sm font-bold leading-normal uppercase tracking-wider">Payment Status</th>
+<th class="px-6 py-4 text-[#111318] dark:text-white text-sm font-bold leading-normal uppercase tracking-wider text-right">Outstanding Balance</th>
+<th class="px-6 py-4 text-[#5d6b89] dark:text-gray-400 text-sm font-bold leading-normal uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-[#d5d9e2] dark:divide-gray-800">
+<!-- Row 1 -->
+<tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">JM</div>
+<div class="flex flex-col">
+<span class="text-[#111318] dark:text-white text-sm font-bold">John Mukasa</span>
+<span class="text-[#5d6b89] dark:text-gray-400 text-xs font-medium uppercase tracking-tighter">ID: 2024001</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex gap-2">
+<span class="px-3 py-1 rounded-md bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white text-xs font-bold">P.7</span>
+<span class="px-3 py-1 rounded-md bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white text-xs font-bold">Blue</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-green/10 text-status-green text-xs font-bold">
+<span class="size-1.5 rounded-full bg-status-green"></span>
+                                                Fully Paid
+                                            </span>
+</td>
+<td class="px-6 py-5 text-right font-mono text-sm font-bold text-gray-900 dark:text-white">UGX 0</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary dark:text-blue-400 text-sm font-bold hover:underline">View Details</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">SN</div>
+<div class="flex flex-col">
+<span class="text-[#111318] dark:text-white text-sm font-bold">Sarah Namono</span>
+<span class="text-[#5d6b89] dark:text-gray-400 text-xs font-medium uppercase tracking-tighter">ID: 2024045</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex gap-2">
+<span class="px-3 py-1 rounded-md bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white text-xs font-bold">P.6</span>
+<span class="px-3 py-1 rounded-md bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white text-xs font-bold">Red</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-yellow/10 text-status-yellow text-xs font-bold">
+<span class="size-1.5 rounded-full bg-status-yellow"></span>
+                                                Partial Payment
+                                            </span>
+</td>
+<td class="px-6 py-5 text-right font-mono text-sm font-bold text-gray-900 dark:text-white">UGX 150,000</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary dark:text-blue-400 text-sm font-bold hover:underline">View Details</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">DO</div>
+<div class="flex flex-col">
+<span class="text-[#111318] dark:text-white text-sm font-bold">David Okello</span>
+<span class="text-[#5d6b89] dark:text-gray-400 text-xs font-medium uppercase tracking-tighter">ID: 2024089</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex gap-2">
+<span class="px-3 py-1 rounded-md bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white text-xs font-bold">P.7</span>
+<span class="px-3 py-1 rounded-md bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white text-xs font-bold">Blue</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-red/10 text-status-red text-xs font-bold">
+<span class="size-1.5 rounded-full bg-status-red"></span>
+                                                Overdue
+                                            </span>
+</td>
+<td class="px-6 py-5 text-right font-mono text-sm font-bold text-status-red">UGX 450,000</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary dark:text-blue-400 text-sm font-bold hover:underline">View Details</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">GA</div>
+<div class="flex flex-col">
+<span class="text-[#111318] dark:text-white text-sm font-bold">Grace Atieno</span>
+<span class="text-[#5d6b89] dark:text-gray-400 text-xs font-medium uppercase tracking-tighter">ID: 2024112</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex gap-2">
+<span class="px-3 py-1 rounded-md bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white text-xs font-bold">P.5</span>
+<span class="px-3 py-1 rounded-md bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white text-xs font-bold">Green</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-green/10 text-status-green text-xs font-bold">
+<span class="size-1.5 rounded-full bg-status-green"></span>
+                                                Fully Paid
+                                            </span>
+</td>
+<td class="px-6 py-5 text-right font-mono text-sm font-bold text-gray-900 dark:text-white">UGX 0</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary dark:text-blue-400 text-sm font-bold hover:underline">View Details</button>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-gray-50/80 dark:hover:bg-gray-800/40 transition-colors">
+<td class="px-6 py-5">
+<div class="flex items-center gap-3">
+<div class="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">PS</div>
+<div class="flex flex-col">
+<span class="text-[#111318] dark:text-white text-sm font-bold">Peter Ssemwanga</span>
+<span class="text-[#5d6b89] dark:text-gray-400 text-xs font-medium uppercase tracking-tighter">ID: 2024205</span>
+</div>
+</div>
+</td>
+<td class="px-6 py-5">
+<div class="flex gap-2">
+<span class="px-3 py-1 rounded-md bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white text-xs font-bold">P.6</span>
+<span class="px-3 py-1 rounded-md bg-[#eaecf1] dark:bg-gray-800 text-[#111318] dark:text-white text-xs font-bold">Red</span>
+</div>
+</td>
+<td class="px-6 py-5">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-status-yellow/10 text-status-yellow text-xs font-bold">
+<span class="size-1.5 rounded-full bg-status-yellow"></span>
+                                                Partial Payment
+                                            </span>
+</td>
+<td class="px-6 py-5 text-right font-mono text-sm font-bold text-gray-900 dark:text-white">UGX 75,000</td>
+<td class="px-6 py-5 text-right">
+<button class="text-primary dark:text-blue-400 text-sm font-bold hover:underline">View Details</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Pagination Component -->
+<div class="flex items-center justify-between p-6 bg-white dark:bg-background-dark border-x border-b border-[#d5d9e2] dark:border-gray-800 rounded-b-xl shadow-sm">
+<div class="text-sm text-[#5d6b89] dark:text-gray-400">
+                            Showing <span class="font-bold text-[#111318] dark:text-white">1 to 5</span> of <span class="font-bold text-[#111318] dark:text-white">1,240</span> students
+                        </div>
+<div class="flex items-center gap-2">
+<a class="flex size-10 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">chevron_left</span>
+</a>
+<a class="text-sm font-bold flex size-10 items-center justify-center text-white rounded-lg bg-primary" href="#">1</a>
+<a class="text-sm font-medium flex size-10 items-center justify-center text-[#111318] dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#">2</a>
+<a class="text-sm font-medium flex size-10 items-center justify-center text-[#111318] dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#">3</a>
+<span class="text-sm font-medium flex size-10 items-center justify-center text-[#5d6b89]">...</span>
+<a class="text-sm font-medium flex size-10 items-center justify-center text-[#111318] dark:text-white rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800" href="#">25</a>
+<a class="flex size-10 items-center justify-center rounded-lg border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-lg">chevron_right</span>
+</a>
+</div>
+</div>
+<!-- Additional Footer Info -->
+<div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-primary/5 dark:bg-primary/10 p-5 rounded-xl border border-primary/10">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-primary">verified_user</span>
+<h4 class="font-bold text-primary dark:text-blue-300">Total Outstanding</h4>
+</div>
+<p class="text-2xl font-black text-primary dark:text-white">UGX 12,450,000</p>
+</div>
+<div class="bg-status-green/5 p-5 rounded-xl border border-status-green/10">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-status-green">payments</span>
+<h4 class="font-bold text-status-green">Collected This Term</h4>
+</div>
+<p class="text-2xl font-black text-gray-900 dark:text-white">UGX 84,200,000</p>
+</div>
+<div class="bg-status-red/5 p-5 rounded-xl border border-status-red/10">
+<div class="flex items-center gap-3 mb-2">
+<span class="material-symbols-outlined text-status-red">warning</span>
+<h4 class="font-bold text-status-red">Overdue Accounts</h4>
+</div>
+<p class="text-2xl font-black text-gray-900 dark:text-white">14 Students</p>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
+</body></html>
