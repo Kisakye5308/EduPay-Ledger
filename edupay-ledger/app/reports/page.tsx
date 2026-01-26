@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Card, Table, Badge, Button, Input, Progress, Modal } from '@/components/ui';
+import React, { useState, useMemo } from 'react';
+import { Card, Table, Badge, Button, Input, ProgressBar, Modal } from '@/components/ui';
 import { useReports } from '@/hooks/useReports';
 import type { AuditLogEntry, GeneratedReport, ClassCollectionData } from '@/lib/services/reports.service';
 
@@ -332,10 +332,14 @@ export default function ReportsPage() {
   };
 
   // Audit log columns
-  const auditColumns = [
+  const auditColumns: Array<{
+    key: string;
+    header: string;
+    render: (log: AuditLogEntry, index: number) => React.ReactNode;
+  }> = [
     {
       key: 'timestamp',
-      title: 'Time',
+      header: 'Time',
       render: (log: AuditLogEntry) => (
         <div className="text-sm">
           <p className="text-gray-900">{formatTimestamp(log.timestamp)}</p>
@@ -347,7 +351,7 @@ export default function ReportsPage() {
     },
     {
       key: 'action',
-      title: 'Action',
+      header: 'Action',
       render: (log: AuditLogEntry) => {
         const config = getActionConfig(log.action);
         return (
@@ -368,7 +372,7 @@ export default function ReportsPage() {
     },
     {
       key: 'details',
-      title: 'Details',
+      header: 'Details',
       render: (log: AuditLogEntry) => (
         <div className="max-w-md">
           <p className="text-sm text-gray-900 line-clamp-1">{log.details}</p>
@@ -380,7 +384,7 @@ export default function ReportsPage() {
     },
     {
       key: 'amount',
-      title: 'Amount',
+      header: 'Amount',
       render: (log: AuditLogEntry) => (
         log.amount ? (
           <span className="font-medium text-gray-900">
@@ -393,7 +397,7 @@ export default function ReportsPage() {
     },
     {
       key: 'actor',
-      title: 'User',
+      header: 'User',
       render: (log: AuditLogEntry) => (
         <div className="text-sm">
           <p className="text-gray-900">{log.actor}</p>
@@ -403,12 +407,12 @@ export default function ReportsPage() {
     },
     {
       key: 'stellar',
-      title: 'Blockchain',
+      header: 'Blockchain',
       render: (log: AuditLogEntry) => <StellarStatusBadge status={log.stellarStatus} />,
     },
     {
       key: 'actions',
-      title: '',
+      header: '',
       render: (log: AuditLogEntry) => (
         <button
           onClick={() => setSelectedLog(log)}
@@ -742,13 +746,8 @@ export default function ReportsPage() {
           <Table
             data={paginatedLogs}
             columns={auditColumns}
-            emptyState={
-              <div className="text-center py-8">
-                <span className="material-symbols-rounded text-4xl text-gray-300">search_off</span>
-                <p className="text-gray-500 mt-2">No audit logs found</p>
-                <p className="text-sm text-gray-400">Try adjusting your filters</p>
-              </div>
-            }
+            keyExtractor={(log) => log.id}
+            emptyMessage="No audit logs found"
           />
         </div>
 
