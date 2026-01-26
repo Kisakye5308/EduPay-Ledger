@@ -11,3 +11,7 @@ export * from './student.service';
 export * from './school.service';
 export * from './scheduler.service';
 export * from './export.service';
+export * from './dashboard.service';
+export * from './payments.service';
+export * from './reports.service';
+export * from './settings.service';

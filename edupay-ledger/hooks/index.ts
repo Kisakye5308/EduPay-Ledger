@@ -5,3 +5,4 @@ export { useDashboard } from './useDashboard';
 export { useStudents } from './useStudents';
 export { usePayments } from './usePayments';
 export { useReports } from './useReports';
+export { useSettings } from './useSettings';
