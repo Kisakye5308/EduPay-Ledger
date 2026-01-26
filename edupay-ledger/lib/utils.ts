@@ -85,9 +85,29 @@ export function generateReceiptNumber(): string {
 /**
  * Generates a unique student ID
  */
-export function generateStudentId(schoolCode: string, year: number): string {
+export function generateStudentId(schoolId: string, className: string): string {
+  const year = new Date().getFullYear();
   const random = Math.random().toString(36).substring(2, 6).toUpperCase();
-  return `EDU-${year}-${random}-${schoolCode}`;
+  const classCode = className.replace(/[^A-Za-z0-9]/g, '').substring(0, 2).toUpperCase();
+  return `EDU-${year}-${random}-${classCode}`;
+}
+
+/**
+ * Generates a unique payment ID
+ */
+export function generatePaymentId(): string {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+  return `PAY-${timestamp}-${random}`;
+}
+
+/**
+ * Generates a generic unique ID with prefix
+ */
+export function generateId(prefix: string = 'ID'): string {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `${prefix}-${timestamp}-${random}`;
 }
 
 /**
