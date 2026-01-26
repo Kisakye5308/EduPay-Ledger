@@ -8,6 +8,18 @@ import { Badge, PaymentStatusBadge } from '@/components/ui/Badge';
 import { ProgressBar } from '@/components/ui/Progress';
 import { formatUGX, formatDate } from '@/lib/utils';
 
+// Type for installment status
+type InstallmentStatus = 'not_started' | 'in_progress' | 'completed' | 'overdue';
+
+interface Installment {
+  id: string;
+  name: string;
+  amountDue: number;
+  amountPaid: number;
+  status: InstallmentStatus;
+  deadline: Date;
+}
+
 // Mock data - would come from Firebase in production
 const mockStudentData = {
   id: '1',
@@ -30,7 +42,7 @@ const mockStudentData = {
       name: 'First Installment (Deposit)',
       amountDue: 725000,
       amountPaid: 725000,
-      status: 'completed' as const,
+      status: 'completed' as InstallmentStatus,
       deadline: new Date('2024-02-01'),
     },
     {
@@ -38,7 +50,7 @@ const mockStudentData = {
       name: 'Second Installment',
       amountDue: 435000,
       amountPaid: 125000,
-      status: 'in_progress' as const,
+      status: 'in_progress' as InstallmentStatus,
       deadline: new Date('2024-03-15'),
     },
     {
@@ -46,10 +58,10 @@ const mockStudentData = {
       name: 'Final Installment',
       amountDue: 290000,
       amountPaid: 0,
-      status: 'not_started' as const,
+      status: 'not_started' as InstallmentStatus,
       deadline: new Date('2024-04-15'),
     },
-  ],
+  ] as Installment[],
   payments: [
     {
       id: '1',

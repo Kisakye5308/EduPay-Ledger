@@ -21,8 +21,8 @@ import { Payment, PaymentRecordInput, PaymentChannel } from '@/types/payment';
 import { Student, InstallmentProgress } from '@/types/student';
 import { anchorPaymentToStellar, queueForRetry, PaymentProof } from '@/lib/stellar';
 import { generateReceiptNumber, generatePaymentId } from '@/lib/utils';
-import { sendPaymentReceiptSMS, sendPaymentReceiptEmail } from './notification.service';
-import { generateReceipt } from './receipt.service';
+import { sendPaymentReceiptSMS, sendPaymentReceiptEmail } from '@/lib/services/notification.service';
+import { generateReceipt } from '@/lib/services/receipt.service';
 
 export interface PaymentRecordResult {
   success: boolean;
@@ -336,7 +336,7 @@ function applyPaymentToInstallments(
 ): InstallmentProgress[] {
   const now = Timestamp.now();
   
-  return installments.map(installment => {
+  const updatedInstallments: InstallmentProgress[] = installments.map(installment => {
     const application = applications.find(
       a => a.installmentId === installment.installmentId
     );
@@ -349,11 +349,13 @@ function applyPaymentToInstallments(
     return {
       ...installment,
       amountPaid: newAmountPaid,
-      status: isCompleted ? 'completed' : 'in_progress',
+      status: (isCompleted ? 'completed' : 'in_progress') as InstallmentProgress['status'],
       completedAt: isCompleted ? now : undefined,
     };
-  }).map((installment, index, arr) => {
-    // Unlock next installment if current is completed
+  });
+
+  // Unlock next installment if current is completed
+  return updatedInstallments.map((installment, index, arr) => {
     if (index > 0) {
       const prevInstallment = arr[index - 1];
       if (prevInstallment.status === 'completed') {

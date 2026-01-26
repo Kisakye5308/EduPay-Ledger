@@ -1,6 +1,6 @@
 /**
  * Receipt Service
- * 
+ *
  * Generates digital and printable PDF receipts for payments
  */
 
