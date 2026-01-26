@@ -52,7 +52,7 @@ export interface DashboardStats {
 export interface DashboardChartData {
   weeklyTrend: { day: string; amount: number }[];
   monthlyTrend: { month: string; amount: number }[];
-  paymentMethods: { method: string; amount: number; count: number }[];
+  paymentChannels: { channel: string; amount: number; count: number }[];
   classDistribution: { className: string; collected: number; arrears: number }[];
 }
 
