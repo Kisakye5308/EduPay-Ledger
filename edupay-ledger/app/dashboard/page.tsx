@@ -99,7 +99,7 @@ function ArrearsHeatmap({ data, onCellClick }: HeatmapProps) {
   };
 
   // Get all unique streams across all classes
-  const allStreams = [...new Set(data.flatMap(row => row.streams.map(s => s.name)))].sort();
+  const allStreams = Array.from(new Set(data.flatMap(row => row.streams.map(s => s.name)))).sort();
 
   return (
     <div className="overflow-x-auto">

@@ -8,9 +8,10 @@ interface CardProps {
   className?: string;
   padding?: 'none' | 'sm' | 'md' | 'lg';
   shadow?: boolean;
+  onClick?: () => void;
 }
 
-export function Card({ children, className, padding = 'md', shadow = true }: CardProps) {
+export function Card({ children, className, padding = 'md', shadow = true, onClick }: CardProps) {
   const paddingStyles = {
     none: '',
     sm: 'p-4',
@@ -24,8 +25,13 @@ export function Card({ children, className, padding = 'md', shadow = true }: Car
         'bg-white dark:bg-slate-900 rounded-xl border border-border-light dark:border-slate-800',
         shadow && 'shadow-sm',
         paddingStyles[padding],
+        onClick && 'cursor-pointer',
         className
       )}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => e.key === 'Enter' && onClick() : undefined}
     >
       {children}
     </div>
