@@ -91,6 +91,7 @@ export async function createStudent(
         isUnlocked: index === 0, // Only first installment is unlocked initially
       }));
 
+
     const student: Student = {
       id: '', // Will be set after creation
       studentId,

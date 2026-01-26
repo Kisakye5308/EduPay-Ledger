@@ -1,9 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Sidebar } from '@/components/navigation/Sidebar';
+import { Sidebar, MobileNav } from '@/components/navigation/Sidebar';
 import { TopNav } from '@/components/navigation/TopNav';
-import { MobileNav } from '@/components/navigation/MobileNav';
 
 export default function ArrearsLayout({
   children,
