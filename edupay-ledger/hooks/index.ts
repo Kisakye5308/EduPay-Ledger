@@ -6,3 +6,24 @@ export { useStudents } from './useStudents';
 export { usePayments } from './usePayments';
 export { useReports } from './useReports';
 export { useSettings } from './useSettings';
+
+// Firebase hooks
+export {
+  useDashboardStats,
+  useRecentActivity,
+  useDashboardAlerts,
+  useDashboardCharts,
+  useStudents as useStudentsFirebase,
+  useStudentsRealtime,
+  useStudent,
+  useStudentStats,
+  useStudentSearch,
+  usePayments as usePaymentsFirebase,
+  usePaymentsRealtime,
+  useTodayPayments,
+  usePaymentStats,
+  useSchoolSettings,
+  useTerms,
+  useClasses,
+  useCurrencyFormat,
+} from './useFirebase';

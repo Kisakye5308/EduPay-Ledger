@@ -317,14 +317,17 @@ export async function fetchDocument<T>(collectionName: string, docId: string): P
 
 /**
  * Fetch all documents from a collection with optional query constraints
+ * Supports both spread arguments and array of constraints
  */
 export async function fetchCollection<T>(
   collectionName: string,
-  ...queryConstraints: QueryConstraint[]
+  queryConstraints: QueryConstraint[] = []
 ): Promise<T[]> {
   const { db } = initializeFirebase();
   const collectionRef = collection(db, collectionName);
-  const q = query(collectionRef, ...queryConstraints);
+  const q = queryConstraints.length > 0 
+    ? query(collectionRef, ...queryConstraints) 
+    : query(collectionRef);
   const snapshot = await getDocs(q);
   
   return snapshot.docs.map(doc => ({
@@ -423,18 +426,26 @@ export async function runFirestoreTransaction<T>(
 export function subscribeToDocument<T>(
   collectionName: string,
   docId: string,
-  callback: (data: T | null) => void
+  callback: (data: T | null) => void,
+  onError?: (error: Error) => void
 ): () => void {
   const { db } = initializeFirebase();
   const docRef = doc(db, collectionName, docId);
   
-  return onSnapshot(docRef, (docSnap) => {
-    if (docSnap.exists()) {
-      callback({ id: docSnap.id, ...docSnap.data() } as T);
-    } else {
-      callback(null);
+  return onSnapshot(
+    docRef, 
+    (docSnap) => {
+      if (docSnap.exists()) {
+        callback({ id: docSnap.id, ...docSnap.data() } as T);
+      } else {
+        callback(null);
+      }
+    },
+    (error) => {
+      if (onError) onError(error);
+      else console.error('Document subscription error:', error);
     }
-  });
+  );
 }
 
 /**
@@ -442,20 +453,30 @@ export function subscribeToDocument<T>(
  */
 export function subscribeToCollection<T>(
   collectionName: string,
+  queryConstraints: QueryConstraint[],
   callback: (data: T[]) => void,
-  ...queryConstraints: QueryConstraint[]
+  onError?: (error: Error) => void
 ): () => void {
   const { db } = initializeFirebase();
   const collectionRef = collection(db, collectionName);
-  const q = query(collectionRef, ...queryConstraints);
+  const q = queryConstraints.length > 0 
+    ? query(collectionRef, ...queryConstraints) 
+    : query(collectionRef);
   
-  return onSnapshot(q, (snapshot) => {
-    const data = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as T[];
-    callback(data);
-  });
+  return onSnapshot(
+    q, 
+    (snapshot) => {
+      const data = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as T[];
+      callback(data);
+    },
+    (error) => {
+      if (onError) onError(error);
+      else console.error('Collection subscription error:', error);
+    }
+  );
 }
 
 // ============================================================================
@@ -508,18 +529,27 @@ export async function callFunction<T = any, R = any>(
 
 /**
  * Log an action to the audit trail
+ * @param action - The action type (CREATE, UPDATE, DELETE, etc.)
+ * @param collection - The collection being modified
+ * @param documentId - The ID of the document being modified
+ * @param userId - The ID of the user performing the action
+ * @param details - Additional details about the action
  */
 export async function logAuditAction(
   action: string,
-  details: Record<string, any>,
-  userId?: string
+  collectionName: string,
+  documentId: string,
+  userId: string,
+  details?: Record<string, any>
 ): Promise<void> {
   const { db, auth } = initializeFirebase();
   const user = auth.currentUser;
   
   const auditLog = {
     action,
-    details,
+    collection: collectionName,
+    documentId,
+    details: details || {},
     userId: userId || user?.uid || 'system',
     userEmail: user?.email || 'system',
     timestamp: serverTimestamp(),
