@@ -10,6 +10,7 @@ type BadgeVariant =
   | 'danger' 
   | 'info' 
   | 'primary'
+  | 'secondary'
   | 'outline';
 
 interface BadgeProps {
@@ -36,6 +37,7 @@ export function Badge({
     danger: 'bg-status-red/10 text-status-red',
     info: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
     primary: 'bg-primary/10 text-primary dark:text-blue-300',
+    secondary: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300',
     outline: 'bg-transparent border border-current',
   };
 
@@ -51,6 +53,7 @@ export function Badge({
     danger: 'bg-status-red',
     info: 'bg-blue-500',
     primary: 'bg-primary',
+    secondary: 'bg-purple-500',
     outline: 'bg-current',
   };
 
