@@ -1,5 +1,6 @@
 'use client';
 
+
 import React, { useState, useMemo } from 'react';
 import { Card, Table, Badge, Button, Input, ProgressBar, Modal } from '@/components/ui';
 import { useReports } from '@/hooks/useReports';
@@ -72,7 +73,7 @@ function StatsCard({
           )}
           {trend && (
             <div className={`flex items-center gap-1 mt-2 text-xs ${trend.value >= 0 ? 'text-success-600' : 'text-danger-600'}`}>
-              <span className="material-symbols-rounded text-sm">
+              <span className="material-symbols-outlined text-sm">
                 {trend.value >= 0 ? 'trending_up' : 'trending_down'}
               </span>
               <span>{trend.value >= 0 ? '+' : ''}{trend.value}% {trend.label}</span>
@@ -80,7 +81,7 @@ function StatsCard({
           )}
         </div>
         <div className={`p-3 rounded-xl ${iconStyles[variant]}`}>
-          <span className="material-symbols-rounded text-xl">{icon}</span>
+          <span className="material-symbols-outlined text-xl">{icon}</span>
         </div>
       </div>
     </div>
@@ -225,7 +226,7 @@ function StellarStatusBadge({ status }: { status: 'anchored' | 'pending' | 'fail
   
   return (
     <Badge variant={variant} className="inline-flex items-center gap-1">
-      <span className="material-symbols-rounded text-xs">{icon}</span>
+      <span className="material-symbols-outlined text-xs">{icon}</span>
       {label}
     </Badge>
   );
@@ -249,13 +250,13 @@ function ReportGenerationCard({
     >
       <div className="flex items-start gap-3">
         <div className="p-2 rounded-lg bg-primary-100 text-primary-600 group-hover:bg-primary-200 transition-colors">
-          <span className="material-symbols-rounded">{icon}</span>
+          <span className="material-symbols-outlined">{icon}</span>
         </div>
         <div className="flex-1">
           <h4 className="font-medium text-gray-900 group-hover:text-primary-700">{title}</h4>
           <p className="text-sm text-gray-500 mt-0.5">{description}</p>
         </div>
-        <span className="material-symbols-rounded text-gray-400 group-hover:text-primary-500">
+        <span className="material-symbols-outlined text-gray-400 group-hover:text-primary-500">
           arrow_forward
         </span>
       </div>
@@ -363,7 +364,7 @@ export default function ReportsPage() {
               config.variant === 'primary' ? 'bg-primary-100 text-primary-600' :
               'bg-gray-100 text-gray-600'
             }`}>
-              <span className="material-symbols-rounded text-sm">{config.icon}</span>
+              <span className="material-symbols-outlined text-sm">{config.icon}</span>
             </div>
             <span className="font-medium text-gray-900">{config.label}</span>
           </div>
@@ -418,7 +419,7 @@ export default function ReportsPage() {
           onClick={() => setSelectedLog(log)}
           className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-700"
         >
-          <span className="material-symbols-rounded text-lg">visibility</span>
+          <span className="material-symbols-outlined text-lg">visibility</span>
         </button>
       ),
     },
@@ -450,7 +451,7 @@ export default function ReportsPage() {
             onClick={refreshData}
             className="flex items-center gap-2"
           >
-            <span className="material-symbols-rounded text-lg">refresh</span>
+            <span className="material-symbols-outlined text-lg">refresh</span>
             Refresh
           </Button>
           <Button
@@ -459,7 +460,7 @@ export default function ReportsPage() {
             onClick={() => setShowExportModal(true)}
             className="flex items-center gap-2"
           >
-            <span className="material-symbols-rounded text-lg">download</span>
+            <span className="material-symbols-outlined text-lg">download</span>
             Export
           </Button>
           <Button
@@ -468,7 +469,7 @@ export default function ReportsPage() {
             onClick={() => setShowGenerateModal(true)}
             className="flex items-center gap-2"
           >
-            <span className="material-symbols-rounded text-lg">description</span>
+            <span className="material-symbols-outlined text-lg">description</span>
             Generate Report
           </Button>
         </div>
@@ -573,7 +574,7 @@ export default function ReportsPage() {
           <Card>
             <div className="p-4 border-b border-gray-100">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-rounded text-primary-600">token</span>
+                <span className="material-symbols-outlined text-primary-600">token</span>
                 <h3 className="font-semibold text-gray-900">Blockchain Audit</h3>
               </div>
             </div>
@@ -676,7 +677,7 @@ export default function ReportsPage() {
             <div className="flex flex-wrap items-center gap-3">
               {/* Search */}
               <div className="relative">
-                <span className="material-symbols-rounded absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
                   search
                 </span>
                 <input
@@ -734,7 +735,7 @@ export default function ReportsPage() {
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                 }`}
               >
-                <span className="material-symbols-rounded text-sm">{filter.icon}</span>
+                <span className="material-symbols-outlined text-sm">{filter.icon}</span>
                 {filter.label}
               </button>
             ))}
@@ -763,7 +764,7 @@ export default function ReportsPage() {
                 disabled={currentPage === 1}
                 className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="material-symbols-rounded">chevron_left</span>
+                <span className="material-symbols-outlined">chevron_left</span>
               </button>
               
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -798,7 +799,7 @@ export default function ReportsPage() {
                 disabled={currentPage === totalPages}
                 className="p-2 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span className="material-symbols-rounded">chevron_right</span>
+                <span className="material-symbols-outlined">chevron_right</span>
               </button>
             </div>
           </div>
@@ -820,7 +821,7 @@ export default function ReportsPage() {
                     report.format === 'excel' ? 'bg-success-100 text-success-600' :
                     'bg-primary-100 text-primary-600'
                   }`}>
-                    <span className="material-symbols-rounded">
+                    <span className="material-symbols-outlined">
                       {report.format === 'pdf' ? 'picture_as_pdf' :
                        report.format === 'excel' ? 'table_chart' : 'description'}
                     </span>
@@ -838,7 +839,7 @@ export default function ReportsPage() {
                   </Badge>
                   {report.status === 'ready' && (
                     <button className="p-2 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-gray-700">
-                      <span className="material-symbols-rounded">download</span>
+                      <span className="material-symbols-outlined">download</span>
                     </button>
                   )}
                 </div>
@@ -864,7 +865,7 @@ export default function ReportsPage() {
               onClick={() => { exportAuditLogs('csv'); setShowExportModal(false); }}
               className="p-4 border border-gray-200 rounded-xl hover:border-primary-300 hover:bg-primary-50 transition-colors text-center"
             >
-              <span className="material-symbols-rounded text-2xl text-primary-600">table_chart</span>
+              <span className="material-symbols-outlined text-2xl text-primary-600">table_chart</span>
               <p className="mt-2 font-medium">CSV</p>
               <p className="text-xs text-gray-500">Spreadsheet</p>
             </button>
@@ -872,7 +873,7 @@ export default function ReportsPage() {
               onClick={() => { exportAuditLogs('excel'); setShowExportModal(false); }}
               className="p-4 border border-gray-200 rounded-xl hover:border-success-300 hover:bg-success-50 transition-colors text-center"
             >
-              <span className="material-symbols-rounded text-2xl text-success-600">grid_on</span>
+              <span className="material-symbols-outlined text-2xl text-success-600">grid_on</span>
               <p className="mt-2 font-medium">Excel</p>
               <p className="text-xs text-gray-500">Microsoft Excel</p>
             </button>
@@ -880,7 +881,7 @@ export default function ReportsPage() {
               onClick={() => { exportAuditLogs('pdf'); setShowExportModal(false); }}
               className="p-4 border border-gray-200 rounded-xl hover:border-danger-300 hover:bg-danger-50 transition-colors text-center"
             >
-              <span className="material-symbols-rounded text-2xl text-danger-600">picture_as_pdf</span>
+              <span className="material-symbols-outlined text-2xl text-danger-600">picture_as_pdf</span>
               <p className="mt-2 font-medium">PDF</p>
               <p className="text-xs text-gray-500">Print-ready</p>
             </button>
@@ -933,7 +934,7 @@ export default function ReportsPage() {
                     <p className="text-xs text-gray-500">{option.desc}</p>
                   </div>
                   {selectedReportType === option.type && (
-                    <span className="material-symbols-rounded text-primary-600">check_circle</span>
+                    <span className="material-symbols-outlined text-primary-600">check_circle</span>
                   )}
                 </label>
               ))}
@@ -958,7 +959,7 @@ export default function ReportsPage() {
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <span className="material-symbols-rounded text-xl">{option.icon}</span>
+                  <span className="material-symbols-outlined text-xl">{option.icon}</span>
                   <p className="text-sm font-medium mt-1">{option.label}</p>
                 </button>
               ))}
@@ -982,7 +983,7 @@ export default function ReportsPage() {
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-rounded mr-2">description</span>
+                  <span className="material-symbols-outlined mr-2">description</span>
                   Generate Report
                 </>
               )}
@@ -1011,7 +1012,7 @@ export default function ReportsPage() {
                     config.variant === 'primary' ? 'bg-primary-100 text-primary-600' :
                     'bg-gray-100 text-gray-600'
                   }`}>
-                    <span className="material-symbols-rounded">{config.icon}</span>
+                    <span className="material-symbols-outlined">{config.icon}</span>
                   </div>
                 );
               })()}
@@ -1063,7 +1064,7 @@ export default function ReportsPage() {
             {selectedLog.stellarStatus && (
               <div className="p-4 bg-primary-50 rounded-lg border border-primary-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="material-symbols-rounded text-primary-600">token</span>
+                  <span className="material-symbols-outlined text-primary-600">token</span>
                   <span className="font-medium text-primary-900">Blockchain Verification</span>
                 </div>
                 <div className="space-y-2 text-sm">
@@ -1090,7 +1091,7 @@ export default function ReportsPage() {
               </Button>
               {selectedLog.stellarTxHash && (
                 <Button variant="primary" onClick={() => window.open(`https://stellar.expert/explorer/public/tx/${selectedLog.stellarTxHash}`, '_blank')}>
-                  <span className="material-symbols-rounded mr-2">open_in_new</span>
+                  <span className="material-symbols-outlined mr-2">open_in_new</span>
                   View on Stellar
                 </Button>
               )}
