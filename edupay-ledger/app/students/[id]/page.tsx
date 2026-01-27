@@ -11,6 +11,16 @@ import { ProgressBar } from '@/components/ui/Progress';
 import { Table } from '@/components/ui/Table';
 import { formatUGX, formatDate, formatPhone } from '@/lib/utils';
 import { useFirebaseStudentProfile, StudentTransaction } from '@/hooks/useStudentProfile';
+import { useStudentFeeBreakdown } from '@/hooks/useFeeCategories';
+import { useStudentClearance } from '@/hooks/useExamClearance';
+import { useStudentScholarships } from '@/hooks/useScholarship';
+import { useStudentTermBalance } from '@/hooks/useTermBalance';
+import { useStudentResidenceFees } from '@/hooks/useResidenceFees';
+import { FeeCategoryBreakdown } from '@/components/fees/FeeCategoryBreakdown';
+import { StudentScholarshipCard } from '@/components/scholarship/ScholarshipComponents';
+import { ClearanceBadge } from '@/components/clearance/ExamClearanceReport';
+import { StudentCumulativeBalanceCard, CarryoverHistoryList } from '@/components/balance/TermBalanceComponents';
+import { ResidenceTypeBadge, StudentFeeAssignmentCard } from '@/components/residence/ResidenceComponents';
 
 export default function StudentProfilePage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -23,6 +33,31 @@ export default function StudentProfilePage({ params }: { params: { id: string } 
     isAuthenticated,
     authLoading,
   } = useFirebaseStudentProfile(params.id);
+
+  // Get fee breakdown for this student
+  const {
+    breakdown: feeBreakdown,
+    isLoading: breakdownLoading,
+  } = useStudentFeeBreakdown(params.id);
+
+  // Get exam clearance status
+  const {
+    clearance,
+    isLoading: clearanceLoading,
+  } = useStudentClearance(params.id);
+
+  // Get cumulative balance across terms
+  const {
+    balance: cumulativeBalance,
+    carryovers,
+    isLoading: balanceLoading,
+  } = useStudentTermBalance(params.id);
+
+  // Get residence-based fee assignment
+  const {
+    fees: residenceFees,
+    isLoading: residenceFeesLoading,
+  } = useStudentResidenceFees(params.id);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -227,7 +262,12 @@ export default function StudentProfilePage({ params }: { params: { id: string } 
               <h2 className="text-xl font-bold text-primary dark:text-white">
                 {student.firstName} {student.middleName} {student.lastName}
               </h2>
-              <p className="text-sm text-slate-500 mt-1">ID: {student.studentId}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-sm text-slate-500">ID: {student.studentId}</p>
+                {residenceFees && (
+                  <ResidenceTypeBadge type={residenceFees.residenceType} size="sm" />
+                )}
+              </div>
             </div>
             <div>
               <p className="text-xs uppercase tracking-wider text-slate-400 font-bold mb-1">
@@ -254,6 +294,38 @@ export default function StudentProfilePage({ params }: { params: { id: string } 
             </div>
           </div>
         </div>
+        
+        {/* Exam Clearance Status */}
+        {clearance && !clearanceLoading && (
+          <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <ClearanceBadge clearance={clearance} size="lg" showExamType />
+                <div>
+                  <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    Exam Clearance Status
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {clearance.examType === 'end_of_term' && 'End of Term Exams'}
+                    {clearance.examType === 'mock' && 'Mock Examinations'}
+                    {clearance.examType === 'national' && 'National Examinations (UNEB)'}
+                    {' • '}Required: {clearance.thresholdPercentage}% payment
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Current Payment: {clearance.paymentPercentage.toFixed(1)}%
+                </p>
+                {clearance.status === 'conditional' && clearance.conditions && (
+                  <p className="text-xs text-warning">
+                    Condition: {clearance.conditions.notes}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </Card>
 
       {/* Fee Summary Cards */}
@@ -321,6 +393,45 @@ export default function StudentProfilePage({ params }: { params: { id: string } 
             <span className="material-symbols-outlined text-warning text-sm">info</span>
           </div>
         </Card>
+      </div>
+
+      {/* Cumulative Balance (includes previous terms) */}
+      {cumulativeBalance && cumulativeBalance.carryoverBalance > 0 && (
+        <div className="mb-8">
+          <StudentCumulativeBalanceCard
+            balance={cumulativeBalance}
+            isLoading={balanceLoading}
+            onRecordPayment={() => router.push(`/payments/record?studentId=${params.id}`)}
+          />
+          {carryovers.length > 0 && (
+            <div className="mt-4">
+              <h4 className="text-sm font-bold text-slate-600 dark:text-slate-400 mb-3">
+                Balance Carryover History
+              </h4>
+              <CarryoverHistoryList carryovers={carryovers} isLoading={balanceLoading} />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Fee Category Breakdown */}
+      <div className="mb-8">
+        <FeeCategoryBreakdown
+          breakdown={feeBreakdown}
+          isLoading={breakdownLoading}
+          showDetails={true}
+          showPaymentHistory={true}
+          onRecordPayment={() => router.push(`/payments/record?studentId=${params.id}`)}
+        />
+      </div>
+
+      {/* Scholarship Information */}
+      <div className="mb-8">
+        <StudentScholarshipCard
+          studentId={params.id}
+          studentName={`${student.firstName} ${student.lastName}`}
+          className={student.className}
+        />
       </div>
 
       {/* Transaction History */}
