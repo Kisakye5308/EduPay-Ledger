@@ -4,7 +4,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Card, CardHeader, CardBody, CardFooter } from '@/components/ui/Card';
+import { Card, CardHeader, CardBody, CardFooter, CardTitle } from '@/components/ui/Card';
 
 describe('Card Component', () => {
   it('renders card with children', () => {
@@ -16,19 +16,55 @@ describe('Card Component', () => {
     expect(screen.getByText('Card Content')).toBeInTheDocument();
   });
 
-  it('renders with padding when padded prop is true', () => {
+  it('renders with default padding (md = p-6)', () => {
     const { container } = render(
-      <Card padded>
+      <Card>
         <p>Padded Content</p>
       </Card>
     );
     expect(container.firstChild).toHaveClass('p-6');
   });
 
-  it('renders CardHeader correctly', () => {
+  it('renders with different padding sizes', () => {
+    const { container, rerender } = render(
+      <Card padding="sm">
+        <p>Small Padding</p>
+      </Card>
+    );
+    expect(container.firstChild).toHaveClass('p-4');
+
+    rerender(
+      <Card padding="lg">
+        <p>Large Padding</p>
+      </Card>
+    );
+    expect(container.firstChild).toHaveClass('p-8');
+
+    rerender(
+      <Card padding="none">
+        <p>No Padding</p>
+      </Card>
+    );
+    expect(container.firstChild).not.toHaveClass('p-4');
+    expect(container.firstChild).not.toHaveClass('p-6');
+    expect(container.firstChild).not.toHaveClass('p-8');
+  });
+
+  it('renders CardHeader with title prop', () => {
     render(
       <Card>
-        <CardHeader title="Test Title" subtitle="Test Subtitle" />
+        <CardHeader title="Test Title" />
+      </Card>
+    );
+    expect(screen.getByText('Test Title')).toBeInTheDocument();
+  });
+
+  it('renders CardHeader with children', () => {
+    render(
+      <Card>
+        <CardHeader>
+          <CardTitle subtitle="Test Subtitle">Test Title</CardTitle>
+        </CardHeader>
       </Card>
     );
     expect(screen.getByText('Test Title')).toBeInTheDocument();

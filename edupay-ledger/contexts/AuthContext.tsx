@@ -45,10 +45,12 @@ export interface AuthContextType {
   firebaseUser: FirebaseUser | null;
   isLoading: boolean;
   isAuthenticated: boolean;
+  isDemoMode: boolean;
   error: string | null;
   
   // Actions
   login: (email: string, password: string) => Promise<void>;
+  loginAsDemo: () => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string, displayName: string, schoolId: string) => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
@@ -74,10 +76,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [user, setUser] = useState<EduPayUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDemoMode, setIsDemoMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Demo user for trial mode
+  const DEMO_USER: EduPayUser = {
+    uid: 'demo-user-001',
+    email: 'demo@edupay.ug',
+    displayName: 'Demo Admin',
+    photoURL: null,
+    phoneNumber: '+256700000000',
+    role: 'admin',
+    schoolId: 'demo-school-001',
+    schoolName: 'Demo Primary School',
+    permissions: ['all'],
+    isActive: true,
+    lastLogin: new Date(),
+    createdAt: new Date('2024-01-01'),
+  };
+
+  // Check for demo mode in localStorage on mount
+  useEffect(() => {
+    const savedDemoMode = localStorage.getItem('edupay_demo_mode');
+    if (savedDemoMode === 'true') {
+      setIsDemoMode(true);
+      setUser(DEMO_USER);
+      setIsLoading(false);
+    }
+  }, []);
 
   // Initialize Firebase and listen to auth changes
   useEffect(() => {
+    // Skip Firebase auth if in demo mode
+    if (isDemoMode) return;
+    
     initializeFirebase();
     
     const unsubscribe = onAuthChange(async (fbUser) => {
@@ -124,7 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [isDemoMode]);
 
   // Login
   const login = async (email: string, password: string) => {
@@ -149,11 +181,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Login as Demo User (Trial Mode)
+  const loginAsDemo = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    // Set demo mode
+    setIsDemoMode(true);
+    setUser(DEMO_USER);
+    localStorage.setItem('edupay_demo_mode', 'true');
+    
+    setIsLoading(false);
+  };
+
   // Logout
   const logout = async () => {
     try {
       setIsLoading(true);
       setError(null);
+      
+      // Clear demo mode if active
+      if (isDemoMode) {
+        setIsDemoMode(false);
+        localStorage.removeItem('edupay_demo_mode');
+        setUser(null);
+        setIsLoading(false);
+        return;
+      }
+      
       await signOutUser();
       setUser(null);
     } catch (err: any) {
@@ -250,8 +305,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     firebaseUser,
     isLoading,
     isAuthenticated: !!user,
+    isDemoMode,
     error,
     login,
+    loginAsDemo,
     logout,
     register,
     forgotPassword,

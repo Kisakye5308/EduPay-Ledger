@@ -27,10 +27,10 @@ describe('Button Component', () => {
 
   it('renders with different variants', () => {
     const { rerender } = render(<Button variant="primary">Primary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-primary-600');
+    expect(screen.getByRole('button')).toHaveClass('bg-primary');
 
     rerender(<Button variant="secondary">Secondary</Button>);
-    expect(screen.getByRole('button')).toHaveClass('bg-secondary-100');
+    expect(screen.getByRole('button')).toHaveClass('bg-emerald-soft');
 
     rerender(<Button variant="outline">Outline</Button>);
     expect(screen.getByRole('button')).toHaveClass('border');
@@ -47,20 +47,29 @@ describe('Button Component', () => {
   it('shows loading state', () => {
     render(<Button loading>Loading</Button>);
     expect(screen.getByRole('button')).toBeDisabled();
-    expect(screen.getByTestId('loading-spinner')).toBeInTheDocument();
+    // Loading spinner uses material-symbols-outlined
+    expect(screen.getByText('progress_activity')).toBeInTheDocument();
   });
 
-  it('renders with left and right icons', () => {
-    const LeftIcon = () => <span data-testid="left-icon">←</span>;
-    const RightIcon = () => <span data-testid="right-icon">→</span>;
+  it('renders with icon', () => {
+    const TestIcon = () => <span data-testid="test-icon">★</span>;
 
     render(
-      <Button leftIcon={<LeftIcon />} rightIcon={<RightIcon />}>
-        With Icons
+      <Button icon={<TestIcon />}>
+        With Icon
       </Button>
     );
 
-    expect(screen.getByTestId('left-icon')).toBeInTheDocument();
-    expect(screen.getByTestId('right-icon')).toBeInTheDocument();
+    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
+  });
+
+  it('renders fullWidth button', () => {
+    render(<Button fullWidth>Full Width</Button>);
+    expect(screen.getByRole('button')).toHaveClass('w-full');
+  });
+
+  it('applies custom className', () => {
+    render(<Button className="custom-class">Custom</Button>);
+    expect(screen.getByRole('button')).toHaveClass('custom-class');
   });
 });

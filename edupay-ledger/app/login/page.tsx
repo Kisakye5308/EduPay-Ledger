@@ -9,7 +9,7 @@ import { useFirebaseAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading, login } = useFirebaseAuth();
+  const { user, isLoading: authLoading, login, loginAsDemo } = useFirebaseAuth();
   const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -46,12 +46,11 @@ export default function LoginPage() {
     setError('');
     
     try {
-      // Demo credentials - in production, create a demo account in Firebase
-      await login('demo@edupay.ug', 'demo123456');
+      // Use the demo login function from auth context
+      await loginAsDemo();
       router.push('/dashboard');
     } catch (err) {
-      // If demo login fails, just redirect for development
-      router.push('/dashboard');
+      setError('Failed to start demo mode. Please try again.');
     } finally {
       setIsLoading(false);
     }
