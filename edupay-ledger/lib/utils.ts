@@ -15,6 +15,9 @@ export function formatUGX(amount: number): string {
   return `UGX ${amount.toLocaleString('en-UG')}`;
 }
 
+// Alias for formatUGX for consistent naming
+export const formatCurrency = formatUGX;
+
 /**
  * Formats a number in compact form (e.g., 1.5M, 450K)
  */
