@@ -1,9 +1,10 @@
 'use client';
 
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, Table, Badge, Button, Input, ProgressBar, Modal } from '@/components/ui';
-import { useReports } from '@/hooks/useReports';
+import { useFirebaseReports } from '@/hooks/useFirebaseData';
 import type { AuditLogEntry, GeneratedReport, ClassCollectionData } from '@/lib/services/reports.service';
 
 // ============================================================================
@@ -269,6 +270,7 @@ function ReportGenerationCard({
 // ============================================================================
 
 export default function ReportsPage() {
+  const router = useRouter();
   const {
     stats,
     filteredLogs,
@@ -294,7 +296,16 @@ export default function ReportsPage() {
     exportAuditLogs,
     getActionConfig,
     formatCurrency,
-  } = useReports({ pageSize: 10 });
+    isAuthenticated,
+    authLoading,
+  } = useFirebaseReports({ pageSize: 10 });
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [authLoading, isAuthenticated, router]);
   
   // Modal states
   const [showExportModal, setShowExportModal] = useState(false);

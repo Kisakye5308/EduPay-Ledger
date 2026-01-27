@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Card, CardTitle } from '@/components/ui/Card';
@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Table, Pagination } from '@/components/ui/Table';
 import { Modal } from '@/components/ui/Modal';
 import { formatUGX, formatDate } from '@/lib/utils';
-import { usePayments, PaymentListItem, PaymentActivity, ChannelBreakdown } from '@/hooks/usePayments';
+import { useFirebasePayments } from '@/hooks/useFirebaseData';
+import type { PaymentListItem, PaymentActivity, ChannelBreakdown } from '@/hooks/usePayments';
 
 // ============================================================================
 // SUB-COMPONENTS
@@ -512,10 +513,20 @@ export default function PaymentsPage() {
     refresh,
     availableChannels,
     availableStatuses,
-  } = usePayments({ pageSize: 10, useMockData: true });
+    isAuthenticated,
+    authLoading,
+  } = useFirebasePayments({ pageSize: 10 });
 
+  const router = useRouter();
   const [selectedPayment, setSelectedPayment] = useState<PaymentListItem | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   // Table columns
   const columns = [

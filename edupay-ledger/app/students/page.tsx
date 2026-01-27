@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Card, CardTitle } from '@/components/ui/Card';
@@ -11,7 +11,8 @@ import { Table, Pagination } from '@/components/ui/Table';
 import { Modal } from '@/components/ui/Modal';
 import { Input, Select } from '@/components/ui/Input';
 import { formatUGX } from '@/lib/utils';
-import { useStudents, StudentListItem } from '@/hooks/useStudents';
+import { useFirebaseStudents } from '@/hooks/useFirebaseData';
+import type { StudentListItem } from '@/hooks/useStudents';
 
 // ============================================================================
 // SUB-COMPONENTS
@@ -266,10 +267,20 @@ export default function StudentsPage() {
     refresh,
     availableClasses,
     availableStreams,
-  } = useStudents({ pageSize: 10, useMockData: true });
+    isAuthenticated,
+    authLoading,
+  } = useFirebaseStudents({ pageSize: 10 });
 
+  const router = useRouter();
   const [showExportModal, setShowExportModal] = useState(false);
   const [searchInput, setSearchInput] = useState('');
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   // Handle search with debounce
   const handleSearch = (value: string) => {

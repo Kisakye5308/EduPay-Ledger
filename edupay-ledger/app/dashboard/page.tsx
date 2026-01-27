@@ -2,13 +2,14 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { CollectionProgress } from '@/components/ui/Progress';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { formatRelativeTime } from '@/lib/utils';
-import { useDashboard } from '@/hooks/useDashboard';
+import { useFirebaseDashboard } from '@/hooks/useFirebaseData';
 import type { HeatmapRow, ActivityItem, InstallmentStat } from '@/lib/services/dashboard.service';
 
 // ============================================================================
@@ -297,10 +298,18 @@ function InstallmentBreakdown({ stats }: InstallmentBreakdownProps) {
 // ============================================================================
 
 export default function DashboardPage() {
-  const { data, isLoading, error, refresh } = useDashboard({ useMockData: true });
+  const router = useRouter();
+  const { data, isLoading, error, refresh, isAuthenticated, authLoading } = useFirebaseDashboard({ realtime: true });
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedCell, setSelectedCell] = useState<{ classId: string; stream: string } | null>(null);
+
+  // Redirect to login if not authenticated
+  React.useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [authLoading, isAuthenticated, router]);
 
   const formatAmount = (amount: number) => {
     if (amount >= 1000000) {

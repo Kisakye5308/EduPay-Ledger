@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card, StatsCard } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge, SeverityBadge } from '@/components/ui/Badge';
@@ -10,110 +11,51 @@ import { FilterChip } from '@/components/ui/Chip';
 import { Modal } from '@/components/ui/Modal';
 import { Textarea } from '@/components/ui/Input';
 import { formatUGX, formatPhone, formatDate } from '@/lib/utils';
-
-// Mock arrears data
-const mockArrearsStudents = [
-  {
-    id: 'EDU-2023-089-JK',
-    name: 'Okello David',
-    class: 'Senior 3',
-    stream: 'West Wing',
-    photo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD5oYSbm0kpGq5ZlpBLMlsJEilVxaXW_Tv6NwPXPbqvF5LDcRD_qZ6PxqFKcS1pHrpd0bKqsaO8vZZZOb1lY3uTpwHLxJ0VsMqYWjxK',
-    guardian: 'Mr. James Okello',
-    guardianPhone: '+256772111222',
-    totalFees: 1200000,
-    amountPaid: 360000,
-    balance: 840000,
-    daysOverdue: 45,
-    severity: 'critical' as const,
-    lastPaymentDate: new Date('2024-07-15'),
-    lastContactDate: new Date('2024-09-01'),
-    contactAttempts: 4,
-  },
-  {
-    id: 'EDU-2022-112-MW',
-    name: 'Nakato Sarah',
-    class: 'Senior 2',
-    stream: 'East Wing',
-    photo: null,
-    guardian: 'Mrs. Grace Nakato',
-    guardianPhone: '+256782333444',
-    totalFees: 1100000,
-    amountPaid: 550000,
-    balance: 550000,
-    daysOverdue: 28,
-    severity: 'high' as const,
-    lastPaymentDate: new Date('2024-08-01'),
-    lastContactDate: new Date('2024-09-10'),
-    contactAttempts: 2,
-  },
-  {
-    id: 'EDU-2024-045-AB',
-    name: 'Tumusiime Peter',
-    class: 'Senior 1',
-    stream: 'North Wing',
-    photo: null,
-    guardian: 'Mr. Robert Tumusiime',
-    guardianPhone: '+256703555666',
-    totalFees: 1000000,
-    amountPaid: 600000,
-    balance: 400000,
-    daysOverdue: 14,
-    severity: 'medium' as const,
-    lastPaymentDate: new Date('2024-08-20'),
-    lastContactDate: new Date('2024-09-12'),
-    contactAttempts: 1,
-  },
-  {
-    id: 'EDU-2023-067-CD',
-    name: 'Apio Grace',
-    class: 'Senior 4',
-    stream: 'South Wing',
-    photo: null,
-    guardian: 'Mrs. Mary Apio',
-    guardianPhone: '+256772777888',
-    totalFees: 1450000,
-    amountPaid: 1087500,
-    balance: 362500,
-    daysOverdue: 7,
-    severity: 'low' as const,
-    lastPaymentDate: new Date('2024-09-05'),
-    lastContactDate: null,
-    contactAttempts: 0,
-  },
-];
-
-const mockStats = {
-  totalInArrears: 64,
-  totalArrearsAmount: 28450000,
-  criticalCount: 12,
-  highCount: 18,
-  mediumCount: 22,
-  lowCount: 12,
-  smssSentToday: 45,
-  recoveredThisWeek: 3200000,
-};
-
-const severityFilters = [
-  { label: 'All Severities', value: 'all', count: 64 },
-  { label: 'Critical (30+ days)', value: 'critical', count: 12 },
-  { label: 'High (15-30 days)', value: 'high', count: 18 },
-  { label: 'Medium (7-14 days)', value: 'medium', count: 22 },
-  { label: 'Low (1-7 days)', value: 'low', count: 12 },
-];
+import { useFirebaseArrears } from '@/hooks/useArrears';
 
 export default function ArrearsPage() {
-  const [selectedSeverity, setSelectedSeverity] = useState('all');
+  const router = useRouter();
+  const {
+    students: arrearsStudents,
+    stats,
+    filters,
+    setFilters,
+    currentPage,
+    totalPages,
+    setCurrentPage,
+    isLoading,
+    error,
+    refresh,
+    sendReminder,
+    sendBulkReminders,
+    isAuthenticated,
+    authLoading,
+  } = useFirebaseArrears({ pageSize: 10 });
+
   const [selectedStudents, setSelectedStudents] = useState<string[]>([]);
   const [isSmsModalOpen, setIsSmsModalOpen] = useState(false);
   const [smsMessage, setSmsMessage] = useState(
     'Dear Parent/Guardian, this is a reminder that school fees balance of {balance} for {student} is overdue. Please make payment at your earliest convenience. - EduPay'
   );
 
-  const filteredStudents =
-    selectedSeverity === 'all'
-      ? mockArrearsStudents
-      : mockArrearsStudents.filter((s) => s.severity === selectedSeverity);
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [authLoading, isAuthenticated, router]);
+
+  const severityFilters = [
+    { label: 'All Severities', value: 'all', count: stats.totalInArrears },
+    { label: 'Critical (30+ days)', value: 'critical', count: stats.criticalCount },
+    { label: 'High (15-30 days)', value: 'high', count: stats.highCount },
+    { label: 'Medium (7-14 days)', value: 'medium', count: stats.mediumCount },
+    { label: 'Low (1-7 days)', value: 'low', count: stats.lowCount },
+  ];
+
+  const handleSeverityChange = (value: string) => {
+    setFilters({ severity: value });
+  };
 
   const toggleStudentSelection = (id: string) => {
     setSelectedStudents((prev) =>
@@ -122,12 +64,33 @@ export default function ArrearsPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedStudents.length === filteredStudents.length) {
+    if (selectedStudents.length === arrearsStudents.length) {
       setSelectedStudents([]);
     } else {
-      setSelectedStudents(filteredStudents.map((s) => s.id));
+      setSelectedStudents(arrearsStudents.map((s) => s.id));
     }
   };
+
+  const handleSendReminders = async () => {
+    await sendBulkReminders(selectedStudents);
+    setIsSmsModalOpen(false);
+    setSelectedStudents([]);
+  };
+
+  if (isLoading || authLoading) {
+    return (
+      <div className="p-4 lg:p-8 bg-background-light dark:bg-background-dark min-h-full">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-slate-200 dark:bg-slate-700 rounded w-1/3"></div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-24 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const columns = [
     {
@@ -135,12 +98,12 @@ export default function ArrearsPage() {
       header: (
         <input
           type="checkbox"
-          checked={selectedStudents.length === filteredStudents.length}
+          checked={selectedStudents.length === arrearsStudents.length && arrearsStudents.length > 0}
           onChange={toggleSelectAll}
           className="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
         />
       ),
-      render: (student: typeof mockArrearsStudents[0]) => (
+      render: (student: typeof arrearsStudents[0]) => (
         <input
           type="checkbox"
           checked={selectedStudents.includes(student.id)}
@@ -152,7 +115,7 @@ export default function ArrearsPage() {
     {
       key: 'student',
       header: 'Student',
-      render: (student: typeof mockArrearsStudents[0]) => (
+      render: (student: typeof arrearsStudents[0]) => (
         <div className="flex items-center gap-3">
           {student.photo ? (
             <img
@@ -179,7 +142,7 @@ export default function ArrearsPage() {
     {
       key: 'balance',
       header: 'Balance Due',
-      render: (student: typeof mockArrearsStudents[0]) => (
+      render: (student: typeof arrearsStudents[0]) => (
         <div>
           <p className="font-bold text-danger">{formatUGX(student.balance)}</p>
           <p className="text-[10px] text-slate-400">
@@ -191,7 +154,7 @@ export default function ArrearsPage() {
     {
       key: 'overdue',
       header: 'Days Overdue',
-      render: (student: typeof mockArrearsStudents[0]) => (
+      render: (student: typeof arrearsStudents[0]) => (
         <div className="flex items-center gap-2">
           <SeverityBadge severity={student.severity} />
           <span className="font-bold">{student.daysOverdue}</span>
@@ -201,7 +164,7 @@ export default function ArrearsPage() {
     {
       key: 'guardian',
       header: 'Guardian Contact',
-      render: (student: typeof mockArrearsStudents[0]) => (
+      render: (student: typeof arrearsStudents[0]) => (
         <div>
           <p className="text-sm font-medium">{student.guardian}</p>
           <p className="text-xs text-primary dark:text-blue-400 font-mono">
@@ -213,7 +176,7 @@ export default function ArrearsPage() {
     {
       key: 'lastContact',
       header: 'Last Contact',
-      render: (student: typeof mockArrearsStudents[0]) => (
+      render: (student: typeof arrearsStudents[0]) => (
         <div>
           {student.lastContactDate ? (
             <>
@@ -232,9 +195,13 @@ export default function ArrearsPage() {
       key: 'actions',
       header: 'Actions',
       align: 'right' as const,
-      render: (student: typeof mockArrearsStudents[0]) => (
+      render: (student: typeof arrearsStudents[0]) => (
         <div className="flex items-center justify-end gap-1">
-          <button className="p-2 hover:bg-primary/10 rounded-lg text-primary" title="Send SMS">
+          <button 
+            className="p-2 hover:bg-primary/10 rounded-lg text-primary" 
+            title="Send SMS"
+            onClick={() => sendReminder(student.id)}
+          >
             <span className="material-symbols-outlined text-sm">sms</span>
           </button>
           <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg" title="Call">
@@ -299,7 +266,7 @@ export default function ArrearsPage() {
           </span>
           <div>
             <h4 className="font-bold text-danger mb-1">
-              {mockStats.criticalCount} Students Require Immediate Attention
+              {stats.criticalCount} Students Require Immediate Attention
             </h4>
             <p className="text-sm text-slate-600 dark:text-slate-400">
               These students have balances overdue by 30+ days. Consider scheduling parent
@@ -313,25 +280,25 @@ export default function ArrearsPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatsCard
           label="Total in Arrears"
-          value={mockStats.totalInArrears.toString()}
+          value={stats.totalInArrears.toString()}
           icon={<span className="material-symbols-outlined text-danger">group_off</span>}
           iconBg="bg-danger/10"
         />
         <StatsCard
           label="Total Amount Due"
-          value={formatUGX(mockStats.totalArrearsAmount)}
+          value={formatUGX(stats.totalArrearsAmount)}
           icon={<span className="material-symbols-outlined text-warning">account_balance_wallet</span>}
           iconBg="bg-warning/10"
         />
         <StatsCard
           label="SMS Sent Today"
-          value={mockStats.smssSentToday.toString()}
+          value={stats.smssSentToday.toString()}
           icon={<span className="material-symbols-outlined text-primary">sms</span>}
           iconBg="bg-primary/10"
         />
         <StatsCard
           label="Recovered This Week"
-          value={formatUGX(mockStats.recoveredThisWeek)}
+          value={formatUGX(stats.recoveredThisWeek)}
           trend={{ value: 15, isPositive: true }}
           icon={<span className="material-symbols-outlined text-success">trending_up</span>}
           iconBg="bg-success/10"
@@ -344,7 +311,7 @@ export default function ArrearsPage() {
           {
             severity: 'critical',
             label: 'Critical',
-            count: mockStats.criticalCount,
+            count: stats.criticalCount,
             color: 'bg-red-500',
             textColor: 'text-red-600',
             bgColor: 'bg-red-50 dark:bg-red-900/20',
@@ -352,7 +319,7 @@ export default function ArrearsPage() {
           {
             severity: 'high',
             label: 'High',
-            count: mockStats.highCount,
+            count: stats.highCount,
             color: 'bg-orange-500',
             textColor: 'text-orange-600',
             bgColor: 'bg-orange-50 dark:bg-orange-900/20',
@@ -360,7 +327,7 @@ export default function ArrearsPage() {
           {
             severity: 'medium',
             label: 'Medium',
-            count: mockStats.mediumCount,
+            count: stats.mediumCount,
             color: 'bg-yellow-500',
             textColor: 'text-yellow-600',
             bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
@@ -368,7 +335,7 @@ export default function ArrearsPage() {
           {
             severity: 'low',
             label: 'Low',
-            count: mockStats.lowCount,
+            count: stats.lowCount,
             color: 'bg-blue-500',
             textColor: 'text-blue-600',
             bgColor: 'bg-blue-50 dark:bg-blue-900/20',
@@ -376,20 +343,20 @@ export default function ArrearsPage() {
         ].map((item) => (
           <button
             key={item.severity}
-            onClick={() => setSelectedSeverity(item.severity)}
+            onClick={() => handleSeverityChange(item.severity)}
             className={`p-4 rounded-xl border-2 transition-all ${
-              selectedSeverity === item.severity
+              filters.severity === item.severity
                 ? `${item.bgColor} border-current ${item.textColor}`
                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 hover:border-slate-300'
             }`}
           >
             <div className="flex items-center justify-between mb-2">
               <div className={`w-3 h-3 rounded-full ${item.color}`} />
-              <span className={`text-2xl font-bold ${selectedSeverity === item.severity ? item.textColor : ''}`}>
+              <span className={`text-2xl font-bold ${filters.severity === item.severity ? item.textColor : ''}`}>
                 {item.count}
               </span>
             </div>
-            <p className={`text-sm font-medium ${selectedSeverity === item.severity ? item.textColor : 'text-slate-600 dark:text-slate-400'}`}>
+            <p className={`text-sm font-medium ${filters.severity === item.severity ? item.textColor : 'text-slate-600 dark:text-slate-400'}`}>
               {item.label} Priority
             </p>
           </button>
@@ -418,6 +385,8 @@ export default function ArrearsPage() {
                 <input
                   type="text"
                   placeholder="Search students..."
+                  value={filters.search || ''}
+                  onChange={(e) => setFilters({ search: e.target.value })}
                   className="pl-10 pr-4 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary w-full md:w-64"
                 />
               </div>
@@ -430,20 +399,20 @@ export default function ArrearsPage() {
               <FilterChip
                 key={filter.value}
                 label={`${filter.label} (${filter.count})`}
-                selected={selectedSeverity === filter.value}
-                onClick={() => setSelectedSeverity(filter.value)}
+                selected={filters.severity === filter.value}
+                onClick={() => handleSeverityChange(filter.value)}
               />
             ))}
           </div>
         </div>
 
-        <Table columns={columns} data={filteredStudents} keyExtractor={(s) => s.id} />
+        <Table columns={columns} data={arrearsStudents} keyExtractor={(s) => s.id} />
 
         <div className="p-4 bg-slate-50 dark:bg-slate-800/30 flex flex-col md:flex-row justify-between items-center gap-4">
           <span className="text-xs text-slate-500">
-            Showing {filteredStudents.length} students in arrears
+            Showing {arrearsStudents.length} students in arrears
           </span>
-          <Pagination currentPage={1} totalPages={3} onPageChange={() => {}} />
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </Card>
 

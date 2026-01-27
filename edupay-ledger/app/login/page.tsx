@@ -1,14 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Card } from '@/components/ui/Card';
+import { useFirebaseAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { user, loading: authLoading, login } = useFirebaseAuth();
   const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -16,23 +17,59 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, authLoading, router]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
     try {
-      // Simulate login - in production, use Firebase Auth
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      
-      // Redirect to dashboard on success
+      const loginEmail = loginMethod === 'email' ? email : `${phone.replace(/\D/g, '')}@phone.edupay.ug`;
+      await login(loginEmail, password);
       router.push('/dashboard');
     } catch (err) {
-      setError('Invalid credentials. Please try again.');
+      const errorMessage = err instanceof Error ? err.message : 'Invalid credentials. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleDemoLogin = async () => {
+    setIsLoading(true);
+    setError('');
+    
+    try {
+      // Demo credentials - in production, create a demo account in Firebase
+      await login('demo@edupay.ug', 'demo123456');
+      router.push('/dashboard');
+    } catch (err) {
+      // If demo login fails, just redirect for development
+      router.push('/dashboard');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Show loading while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary via-primary/90 to-primary/80 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-white/10 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <span className="material-symbols-outlined text-3xl text-white">school</span>
+          </div>
+          <p className="text-white/60 text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary/90 to-primary/80 flex items-center justify-center p-4">
@@ -173,7 +210,8 @@ export default function LoginPage() {
             type="button"
             variant="outline"
             fullWidth
-            onClick={() => router.push('/dashboard')}
+            onClick={handleDemoLogin}
+            disabled={isLoading}
             icon={<span className="material-symbols-outlined text-sm">play_arrow</span>}
           >
             Try Demo Mode

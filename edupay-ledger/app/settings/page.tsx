@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useSettings } from '@/hooks/useSettings';
+import { useRouter } from 'next/navigation';
+import { useFirebaseSettings } from '@/hooks/useFirebaseData';
 import { Card, Button, Badge, Input, Modal, Table } from '@/components/ui';
 
 // ============================================================================
@@ -1252,9 +1253,21 @@ export default function SettingsPage() {
     getRoleConfig,
     getLogLevelConfig,
     refreshData,
-  } = useSettings();
+    isAuthenticated,
+    authLoading,
+    canManageSettings,
+  } = useFirebaseSettings();
+
+  const router = useRouter();
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login');
+    }
+  }, [authLoading, isAuthenticated, router]);
   
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return <LoadingState />;
   }
   
