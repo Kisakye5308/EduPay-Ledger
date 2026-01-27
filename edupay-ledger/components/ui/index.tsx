@@ -2,7 +2,7 @@ import React from 'react';
 
 export { Button } from './Button';
 export { Input, Textarea, Select } from './Input';
-export { Card, CardHeader, CardTitle, CardContent, CardFooter, StatsCard } from './Card';
+export { Card, CardHeader, CardTitle, CardContent, CardBody, CardFooter, StatsCard } from './Card';
 export { Badge, PaymentStatusBadge, SeverityBadge, VerificationBadge } from './Badge';
 export { ProgressBar, ProgressBar as Progress, InstallmentProgress, CollectionProgress } from './Progress';
 export { Avatar, AvatarGroup } from './Avatar';

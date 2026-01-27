@@ -102,18 +102,19 @@ export function PaymentStatusBadge({ status, className }: PaymentStatusBadgeProp
 
 // Severity Badge
 interface SeverityBadgeProps {
-  severity: 'high' | 'medium' | 'low';
+  severity: 'critical' | 'high' | 'medium' | 'low';
   className?: string;
 }
 
 export function SeverityBadge({ severity, className }: SeverityBadgeProps) {
   const config: Record<string, { label: string; variant: BadgeVariant }> = {
+    critical: { label: 'Critical', variant: 'danger' },
     high: { label: 'High', variant: 'danger' },
     medium: { label: 'Medium', variant: 'warning' },
     low: { label: 'Low', variant: 'info' },
   };
 
-  const { label, variant } = config[severity];
+  const { label, variant } = config[severity] || config.medium;
 
   return (
     <Badge variant={variant} className={cn('uppercase', className)}>

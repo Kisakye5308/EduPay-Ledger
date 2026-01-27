@@ -271,7 +271,6 @@ export default function StudentsPage() {
     authLoading,
   } = useFirebaseStudents({ pageSize: 10 });
 
-  const router = useRouter();
   const [showExportModal, setShowExportModal] = useState(false);
   const [searchInput, setSearchInput] = useState('');
 

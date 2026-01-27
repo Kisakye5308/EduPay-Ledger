@@ -517,7 +517,6 @@ export default function PaymentsPage() {
     authLoading,
   } = useFirebasePayments({ pageSize: 10 });
 
-  const router = useRouter();
   const [selectedPayment, setSelectedPayment] = useState<PaymentListItem | null>(null);
   const [showExportModal, setShowExportModal] = useState(false);
 

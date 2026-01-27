@@ -24,7 +24,7 @@ import {
   ResponsiveContainer,
   ComposedChart,
 } from 'recharts';
-import { Card, CardHeader, CardBody } from '@/components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent, CardBody } from '@/components/ui/Card';
 import { cn, formatCurrency } from '@/lib/utils';
 
 // ============================================================================
@@ -317,7 +317,7 @@ export function PaymentMethodsChart({
                 paddingAngle={2}
                 dataKey="amount"
                 nameKey="method"
-                label={({ method, percentage }) => `${percentage.toFixed(0)}%`}
+                label={({ payload }) => `${(payload?.percentage ?? 0).toFixed(0)}%`}
                 labelLine={false}
               >
                 {data.map((entry, index) => (
@@ -328,7 +328,7 @@ export function PaymentMethodsChart({
                 ))}
               </Pie>
               <Tooltip
-                formatter={(value: number) => formatCurrency(value)}
+                formatter={(value: any) => formatCurrency(Number(value) || 0)}
               />
             </PieChart>
           </ResponsiveContainer>

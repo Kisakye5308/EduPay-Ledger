@@ -133,7 +133,7 @@ export default function ArrearsPage() {
           <div>
             <p className="font-semibold text-primary dark:text-white">{student.name}</p>
             <p className="text-xs text-slate-400">
-              {student.class} • {student.stream}
+              {student.className} • {student.streamName}
             </p>
           </div>
         </div>

@@ -4,8 +4,9 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface TableColumn<T> {
-  key: string;
-  header: string;
+  key?: string;
+  header: React.ReactNode;
+  accessor?: string | ((item: T, index: number) => React.ReactNode);
   className?: string;
   align?: 'left' | 'center' | 'right';
   render?: (item: T, index: number) => React.ReactNode;
@@ -42,9 +43,9 @@ export function Table<T>({
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="bg-gray-50 dark:bg-gray-900/50 border-b border-border-light dark:border-gray-800">
-              {columns.map((column) => (
+              {columns.map((column, colIndex) => (
                 <th
-                  key={column.key}
+                  key={column.key || `col-${colIndex}`}
                   className={cn(
                     'px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400',
                     alignClasses[column.align || 'left'],
@@ -82,20 +83,32 @@ export function Table<T>({
                     onRowClick && 'cursor-pointer'
                   )}
                 >
-                  {columns.map((column) => (
-                    <td
-                      key={column.key}
-                      className={cn(
-                        'px-6 py-5',
-                        alignClasses[column.align || 'left'],
-                        column.className
-                      )}
-                    >
-                      {column.render
-                        ? column.render(item, index)
-                        : (item as any)[column.key]}
-                    </td>
-                  ))}
+                  {columns.map((column, colIndex) => {
+                    // Determine cell content: render > accessor (function) > accessor (string) > key
+                    let cellContent: React.ReactNode;
+                    if (column.render) {
+                      cellContent = column.render(item, index);
+                    } else if (typeof column.accessor === 'function') {
+                      cellContent = column.accessor(item, index);
+                    } else if (typeof column.accessor === 'string') {
+                      cellContent = (item as any)[column.accessor];
+                    } else if (column.key) {
+                      cellContent = (item as any)[column.key];
+                    }
+                    
+                    return (
+                      <td
+                        key={column.key || `cell-${colIndex}`}
+                        className={cn(
+                          'px-6 py-5',
+                          alignClasses[column.align || 'left'],
+                          column.className
+                        )}
+                      >
+                        {cellContent}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             )}
@@ -110,8 +123,8 @@ export function Table<T>({
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
-  totalItems: number;
-  itemsPerPage: number;
+  totalItems?: number;
+  itemsPerPage?: number;
   onPageChange: (page: number) => void;
   className?: string;
 }
@@ -119,12 +132,12 @@ interface PaginationProps {
 export function Pagination({
   currentPage,
   totalPages,
-  totalItems,
-  itemsPerPage,
+  totalItems = 0,
+  itemsPerPage = 10,
   onPageChange,
   className,
 }: PaginationProps) {
-  const startItem = (currentPage - 1) * itemsPerPage + 1;
+  const startItem = totalItems > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0;
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   const getPageNumbers = () => {

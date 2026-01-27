@@ -300,7 +300,7 @@ export default function StudentProfilePage({ params }: { params: { id: string } 
           <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <ClearanceBadge clearance={clearance} size="lg" showExamType />
+                <ClearanceBadge status={clearance.status} size="lg" showIcon />
                 <div>
                   <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     Exam Clearance Status
@@ -309,7 +309,7 @@ export default function StudentProfilePage({ params }: { params: { id: string } 
                     {clearance.examType === 'end_of_term' && 'End of Term Exams'}
                     {clearance.examType === 'mock' && 'Mock Examinations'}
                     {clearance.examType === 'national' && 'National Examinations (UNEB)'}
-                    {' • '}Required: {clearance.thresholdPercentage}% payment
+                    {' • '}Required: {Math.round(clearance.paymentPercentage)}% payment
                   </p>
                 </div>
               </div>
@@ -317,9 +317,9 @@ export default function StudentProfilePage({ params }: { params: { id: string } 
                 <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
                   Current Payment: {clearance.paymentPercentage.toFixed(1)}%
                 </p>
-                {clearance.status === 'conditional' && clearance.conditions && (
+                {clearance.status === 'conditional' && clearance.conditionalDetails && (
                   <p className="text-xs text-warning">
-                    Condition: {clearance.conditions.notes}
+                    Promise: {formatUGX(clearance.conditionalDetails.promiseAmount)} by {new Date(clearance.conditionalDetails.promiseDate.toDate()).toLocaleDateString()}
                   </p>
                 )}
               </div>
@@ -429,8 +429,7 @@ export default function StudentProfilePage({ params }: { params: { id: string } 
       <div className="mb-8">
         <StudentScholarshipCard
           studentId={params.id}
-          studentName={`${student.firstName} ${student.lastName}`}
-          className={student.className}
+          showDetails={true}
         />
       </div>
 

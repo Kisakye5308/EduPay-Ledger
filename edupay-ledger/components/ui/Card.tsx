@@ -39,15 +39,16 @@ export function Card({ children, className, padding = 'md', shadow = true, onCli
 }
 
 interface CardHeaderProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
+  title?: string;
   className?: string;
   action?: React.ReactNode;
 }
 
-export function CardHeader({ children, className, action }: CardHeaderProps) {
+export function CardHeader({ children, title, className, action }: CardHeaderProps) {
   return (
     <div className={cn('flex justify-between items-start mb-4', className)}>
-      <div>{children}</div>
+      <div>{children || (title && <h3 className="text-lg font-bold text-primary dark:text-white">{title}</h3>)}</div>
       {action && <div>{action}</div>}
     </div>
   );
@@ -77,6 +78,9 @@ export function CardContent({ children, className }: CardContentProps) {
   return <div className={cn('', className)}>{children}</div>;
 }
 
+// Alias for CardContent
+export const CardBody = CardContent;
+
 interface CardFooterProps {
   children: React.ReactNode;
   className?: string;
@@ -92,13 +96,16 @@ export function CardFooter({ children, className }: CardFooterProps) {
 
 // Stats Card
 interface StatsCardProps {
-  title: string;
+  title?: string;
+  label?: string; // Alias for title
   value: string | number;
   subtitle?: string;
-  icon?: string;
+  icon?: string | React.ReactNode;
+  iconBg?: string;
   trend?: {
-    value: string;
-    direction: 'up' | 'down' | 'neutral';
+    value: string | number;
+    direction?: 'up' | 'down' | 'neutral';
+    isPositive?: boolean;
   };
   variant?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
   className?: string;
@@ -106,13 +113,17 @@ interface StatsCardProps {
 
 export function StatsCard({
   title,
+  label,
   value,
   subtitle,
   icon,
+  iconBg,
   trend,
   variant = 'default',
   className,
 }: StatsCardProps) {
+  const displayTitle = title || label || '';
+  const trendDirection = trend?.direction || (trend?.isPositive === true ? 'up' : trend?.isPositive === false ? 'down' : 'neutral');
   const variantStyles = {
     default: '',
     primary: 'bg-primary/5 dark:bg-primary/10 border-primary/10',
@@ -137,20 +148,24 @@ export function StatsCard({
     <Card className={cn(variantStyles[variant], className)}>
       <div className="flex justify-between items-start mb-4">
         {icon && (
-          <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
-            <span className="material-symbols-outlined text-primary dark:text-blue-400">
-              {icon}
-            </span>
+          <div className={cn("p-2 bg-slate-100 dark:bg-slate-800 rounded-lg", iconBg)}>
+            {typeof icon === 'string' ? (
+              <span className="material-symbols-outlined text-primary dark:text-blue-400">
+                {icon}
+              </span>
+            ) : (
+              icon
+            )}
           </div>
         )}
         {trend && (
-          <div className={cn('flex items-center gap-1 text-sm font-bold', trendColors[trend.direction])}>
-            <span className="material-symbols-outlined text-sm">{trendIcons[trend.direction]}</span>
+          <div className={cn('flex items-center gap-1 text-sm font-bold', trendColors[trendDirection])}>
+            <span className="material-symbols-outlined text-sm">{trendIcons[trendDirection]}</span>
             <span>{trend.value}</span>
           </div>
         )}
       </div>
-      <p className="text-sm text-gray-500">{title}</p>
+      <p className="text-sm text-gray-500">{displayTitle}</p>
       <h3 className="text-2xl font-bold mt-1 text-gray-900 dark:text-white">{value}</h3>
       {subtitle && <p className="text-xs text-gray-400 mt-2">{subtitle}</p>}
     </Card>

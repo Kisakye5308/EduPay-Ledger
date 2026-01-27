@@ -9,7 +9,7 @@ import { useFirebaseAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, loading: authLoading, login } = useFirebaseAuth();
+  const { user, isLoading: authLoading, login } = useFirebaseAuth();
   const [loginMethod, setLoginMethod] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');

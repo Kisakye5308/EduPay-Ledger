@@ -64,6 +64,7 @@ interface FilterChipProps {
   onClick?: () => void;
   onClear?: () => void;
   active?: boolean;
+  selected?: boolean; // Alias for active
   className?: string;
 }
 
@@ -73,8 +74,10 @@ export function FilterChip({
   onClick,
   onClear,
   active = false,
+  selected,
   className,
 }: FilterChipProps) {
+  const isActive = selected ?? active;
   return (
     <button
       type="button"
@@ -82,14 +85,14 @@ export function FilterChip({
       className={cn(
         'flex h-10 shrink-0 items-center justify-center gap-x-2 rounded-lg px-4',
         'border transition-all',
-        active
+        isActive
           ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-900/50'
           : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-transparent hover:border-primary/30',
         className
       )}
     >
       <span className="text-sm font-medium">{value ? `${label}: ${value}` : label}</span>
-      {active && onClear ? (
+      {isActive && onClear ? (
         <button
           type="button"
           onClick={(e) => {

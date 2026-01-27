@@ -70,7 +70,7 @@ export {
 
 // Residence/Boarding Fee hooks
 export {
-  useFeeStructures,
+  useFeeStructures as useResidenceFeeStructures,
   useFeeStructureManagement,
   useStudentResidenceFees,
   useStudentFeeAssignment,
@@ -115,7 +115,7 @@ export {
 export {
   useDailySummary,
   usePendingTasks,
-  useDashboardAlerts,
+  useDashboardAlerts as useQuickActionAlerts,
   useQuickActions,
   useQuickSearch,
   useKeyboardShortcuts,
