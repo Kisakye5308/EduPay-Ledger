@@ -1,50 +1,34 @@
-<p align="center">
-  <img src="public/icons/icon.svg" alt="EduPay Ledger Logo" width="100" height="100">
-</p>
+# 📚 EduPay Ledger
 
-<h1 align="center">EduPay Ledger</h1>
+**Desktop-First School Fee Management System for Ugandan Schools**
 
-<p align="center">
-  <strong>Desktop-First School Fee Management System for Ugandan Schools</strong>
-  <br>
-  <em>Built for School Bursars • Works Offline • Syncs When Online</em>
-</p>
+*Built for School Bursars • Works Offline • Syncs When Online*
 
-<p align="center">
-  <a href="#-download">
-    <img src="https://img.shields.io/badge/Download-Windows-0078D6?style=for-the-badge&logo=windows" alt="Windows">
-  </a>
-  <a href="#-download">
-    <img src="https://img.shields.io/badge/Download-macOS-000000?style=for-the-badge&logo=apple" alt="macOS">
-  </a>
-  <a href="#-download">
-    <img src="https://img.shields.io/badge/Download-Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux">
-  </a>
-</p>
+[![Windows](https://img.shields.io/badge/Download-Windows-0078D6?style=for-the-badge&logo=windows)](https://github.com/your-org/edupay-ledger/releases)
+[![macOS](https://img.shields.io/badge/Download-macOS-000000?style=for-the-badge&logo=apple)](https://github.com/your-org/edupay-ledger/releases)
+[![Linux](https://img.shields.io/badge/Download-Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://github.com/your-org/edupay-ledger/releases)
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Version">
-  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
-  <img src="https://img.shields.io/badge/Offline-Ready-success" alt="Offline Ready">
-  <img src="https://img.shields.io/badge/Tests-58%20passing-brightgreen" alt="Tests">
-</p>
+![Version](https://img.shields.io/badge/Version-1.0.0-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Offline](https://img.shields.io/badge/Offline-Ready-success)
+![Tests](https://img.shields.io/badge/Tests-58%20passing-brightgreen)
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-- [Overview](#-overview)
-- [Key Features](#-key-features)
-- [Download & Installation](#-download--installation)
-- [Quick Start Guide](#-quick-start-guide)
-- [How It Works](#-how-it-works)
-- [For Developers](#-for-developers)
-- [System Requirements](#-system-requirements)
-- [Support](#-support)
+- [Overview](#overview)
+- [Key Features](#key-features)
+- [Download and Installation](#download-and-installation)
+- [Quick Start Guide](#quick-start-guide)
+- [How It Works](#how-it-works)
+- [For Developers](#for-developers)
+- [System Requirements](#system-requirements)
+- [Support](#support)
 
 ---
 
-## 🎯 Overview
+## Overview
 
 **EduPay Ledger** is a comprehensive school fee management desktop application designed specifically for **School Bursars** in Ugandan primary and secondary schools. 
 
@@ -73,9 +57,9 @@
 
 ---
 
-## ✨ Key Features
+## Key Features
 
-### 💾 Offline-First Architecture
+### Offline-First Architecture
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  EduPay Ledger Desktop App                                  │
@@ -95,7 +79,7 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### 📱 Core Functionality
+### Core Functionality
 
 | Feature | Description |
 |---------|-------------|
@@ -108,7 +92,7 @@
 | **Reports** | Daily, weekly, monthly, and term-based collection reports |
 | **Audit Trail** | Complete history of all transactions for accountability |
 
-### 🔒 Security & Data Safety
+### Security and Data Safety
 
 - **Local-first storage** - Your data stays on your computer
 - **Encrypted sync** - When syncing online, all data is encrypted
@@ -118,7 +102,7 @@
 
 ---
 
-## 📥 Download & Installation
+## Download and Installation
 
 ### Windows
 
@@ -150,7 +134,7 @@ chmod +x EduPay-Ledger-1.0.0.AppImage
 
 ---
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
 ### First Time Setup
 
@@ -190,7 +174,7 @@ chmod +x EduPay-Ledger-1.0.0.AppImage
 
 ---
 
-## ⚙️ How It Works
+## How It Works
 
 ### Offline Mode
 
@@ -221,7 +205,7 @@ When internet is available, EduPay automatically:
 
 ---
 
-## 👨‍💻 For Developers
+## For Developers
 
 ### Tech Stack
 
@@ -321,7 +305,7 @@ npm run electron:build:all
 
 ---
 
-## 💻 System Requirements
+## System Requirements
 
 ### Minimum Requirements
 
@@ -344,14 +328,14 @@ npm run electron:build:all
 
 ---
 
-## 🆘 Support
+## Support
 
 ### Getting Help
 
-- 📖 **User Guide**: Built into the app (Help → User Guide)
-- 📧 **Email Support**: support@edupay.ug
-- 💬 **WhatsApp**: +256 XXX XXX XXX
-- 🐛 **Report Issues**: [GitHub Issues](https://github.com/your-org/edupay-ledger/issues)
+- **User Guide**: Built into the app (Help → User Guide)
+- **Email Support**: support@edupay.ug
+- **WhatsApp**: +256 XXX XXX XXX
+- **Report Issues**: [GitHub Issues](https://github.com/your-org/edupay-ledger/issues)
 
 ### Frequently Asked Questions
 
@@ -390,22 +374,19 @@ Go to Students → Import → Upload Excel/CSV file. The app will guide you thro
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built for Ugandan schools with ❤️
 - Designed with input from school bursars across Uganda
-- Icons by [Material Design Icons](https://materialdesignicons.com/)
 
 ---
 
-<p align="center">
-  <strong>EduPay Ledger</strong> - Simplifying School Fee Management
-  <br>
-  <em>No Internet? No Problem.</em>
-</p>
+**EduPay Ledger** - Simplifying School Fee Management
+
+*No Internet? No Problem.*
