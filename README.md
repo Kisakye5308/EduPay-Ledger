@@ -333,8 +333,8 @@ npm run electron:build:all
 ### Getting Help
 
 - **User Guide**: Built into the app (Help → User Guide)
-- **Email Support**: support@edupay.ug
-- **WhatsApp**: +256 XXX XXX XXX
+- **Email Support**: kamwangaraheem2050@gmail.com
+- **WhatsApp**: +256704057370
 - **Report Issues**: [GitHub Issues](https://github.com/your-org/edupay-ledger/issues)
 
 ### Frequently Asked Questions
