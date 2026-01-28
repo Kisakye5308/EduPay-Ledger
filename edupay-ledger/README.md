@@ -1,396 +1,411 @@
 <p align="center">
-  <img src="public/icons/icon.svg" alt="EduPay Ledger Logo" width="80" height="80">
+  <img src="public/icons/icon.svg" alt="EduPay Ledger Logo" width="100" height="100">
 </p>
 
 <h1 align="center">EduPay Ledger</h1>
 
 <p align="center">
-  <strong>Mobile-First School Fee Management System for Ugandan Schools</strong>
+  <strong>Desktop-First School Fee Management System for Ugandan Schools</strong>
+  <br>
+  <em>Built for School Bursars • Works Offline • Syncs When Online</em>
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> •
-  <a href="#tech-stack">Tech Stack</a> •
-  <a href="#getting-started">Getting Started</a> •
-  <a href="#project-structure">Project Structure</a> •
-  <a href="#api-reference">API</a> •
-  <a href="#deployment">Deployment</a>
+  <a href="#-download">
+    <img src="https://img.shields.io/badge/Download-Windows-0078D6?style=for-the-badge&logo=windows" alt="Windows">
+  </a>
+  <a href="#-download">
+    <img src="https://img.shields.io/badge/Download-macOS-000000?style=for-the-badge&logo=apple" alt="macOS">
+  </a>
+  <a href="#-download">
+    <img src="https://img.shields.io/badge/Download-Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black" alt="Linux">
+  </a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Next.js-14.2-black?logo=next.js" alt="Next.js">
-  <img src="https://img.shields.io/badge/TypeScript-5.3-blue?logo=typescript" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Firebase-10.x-orange?logo=firebase" alt="Firebase">
-  <img src="https://img.shields.io/badge/Tailwind-3.4-38bdf8?logo=tailwindcss" alt="Tailwind">
-  <img src="https://img.shields.io/badge/Tests-58%20passing-green" alt="Tests">
+  <img src="https://img.shields.io/badge/Version-1.0.0-blue" alt="Version">
+  <img src="https://img.shields.io/badge/License-MIT-green" alt="License">
+  <img src="https://img.shields.io/badge/Offline-Ready-success" alt="Offline Ready">
+  <img src="https://img.shields.io/badge/Tests-58%20passing-brightgreen" alt="Tests">
 </p>
 
 ---
 
-## Overview
+## 📋 Table of Contents
 
-**EduPay Ledger** is a comprehensive school fee reconciliation and audit system designed specifically for Ugandan primary and secondary schools. Built as a Progressive Web App (PWA), it works seamlessly on low-cost Android devices with intermittent internet connectivity.
-
-### Why EduPay Ledger?
-
-- **85%** of Ugandan schools still use paper-based fee tracking
-- **40%** revenue leakage due to poor reconciliation
-- **Limited connectivity** in rural areas requires offline-first solutions
-- **Mobile Money** is the dominant payment method, requiring proper integration
-
----
-
-## Features
-
-### 📊 Admin Dashboard
-- Real-time KPIs: collection rates, outstanding balances, daily transactions
-- Collection heatmaps by class and payment method
-- Activity feeds and alert notifications
-- Quick action buttons for common tasks
-
-### 👨‍🎓 Student Management
-- Complete student directory with search and filters
-- Individual financial profiles with payment history
-- Clearance status tracking (Academic, Exams, Graduation)
-- Scholarship and discount management
-
-### 💰 Payment Recording
-- Multi-channel support: Cash, Mobile Money (MTN, Airtel), Bank Transfer
-- Automatic receipt generation with unique receipt numbers
-- Payment validation with minimum amount enforcement
-- Real-time balance calculations
-
-### 📋 Installment Plans
-- Configurable payment rules per term/semester
-- Minimum payment percentage enforcement
-- Deadline management with grace periods
-- Automatic status transitions
-
-### 🚨 Arrears Management
-- Severity-based tracking (Low, Medium, High, Critical)
-- Bulk SMS reminders via Africa's Talking
-- Payment plan negotiations
-- Escalation workflows
-
-### 📈 Financial Reports
-- Comprehensive audit trails
-- Export to PDF and Excel
-- Collection analytics by period
-- Class-wise breakdowns
-
-### 🔐 Security & Audit
-- Role-based access control (Admin, Bursar, Teacher, Parent)
-- Immutable audit logs
-- Stellar blockchain anchoring for payment proofs
-- Session management and activity tracking
+- [Overview](#-overview)
+- [Key Features](#-key-features)
+- [Download & Installation](#-download--installation)
+- [Quick Start Guide](#-quick-start-guide)
+- [How It Works](#-how-it-works)
+- [For Developers](#-for-developers)
+- [System Requirements](#-system-requirements)
+- [Support](#-support)
 
 ---
 
-## Tech Stack
+## 🎯 Overview
 
-| Category | Technology |
-|----------|------------|
-| **Framework** | Next.js 14 (App Router) |
-| **Language** | TypeScript 5.3 |
-| **Styling** | Tailwind CSS 3.4 |
-| **Backend** | Firebase (Auth, Firestore, Cloud Functions) |
-| **Blockchain** | Stellar SDK (Testnet) |
-| **State Management** | React Context + Zustand |
-| **Forms** | React Hook Form + Zod |
-| **Charts** | Recharts |
+**EduPay Ledger** is a comprehensive school fee management desktop application designed specifically for **School Bursars** in Ugandan primary and secondary schools. 
+
+### The Problem We Solve
+
+| Challenge | Our Solution |
+|-----------|--------------|
+| **Paper-based tracking** leads to errors and lost records | Digital records with automatic backups |
+| **No internet in rural areas** makes cloud apps useless | **Works completely offline** - no internet required |
+| **Revenue leakage** from poor reconciliation | Real-time balance tracking and audit trails |
+| **Mobile Money tracking** is manual and error-prone | Integrated MTN & Airtel Money tracking |
+| **No receipts** means disputes with parents | Automatic receipt generation with unique numbers |
+
+### Who Is This For?
+
+🎯 **Primary Users: School Bursars**
+- Record fee payments (cash, mobile money, bank transfer)
+- Track student balances and arrears
+- Generate receipts and reports
+- Manage installment plans
+
+📊 **Secondary Users: School Administrators**
+- View collection dashboards
+- Monitor arrears and outstanding fees
+- Access audit trails and reports
+
+---
+
+## ✨ Key Features
+
+### 💾 Offline-First Architecture
+```
+┌─────────────────────────────────────────────────────────────┐
+│  EduPay Ledger Desktop App                                  │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Local Database (IndexedDB)                          │   │
+│  │  • All student records                               │   │
+│  │  • Payment history                                   │   │
+│  │  • Receipts & reports                                │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                          ↕ Auto-sync when online            │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Cloud Backup (Firebase)                             │   │
+│  │  • Encrypted data sync                               │   │
+│  │  • Multi-device access                               │   │
+│  │  • Automatic conflict resolution                     │   │
+│  └─────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 📱 Core Functionality
+
+| Feature | Description |
+|---------|-------------|
+| **Student Directory** | Complete student database with search, filter by class/stream |
+| **Payment Recording** | Record Cash, MTN MoMo, Airtel Money, Bank Transfer payments |
+| **Auto Receipts** | Generate printable receipts with unique receipt numbers |
+| **Balance Tracking** | Real-time view of each student's fee balance |
+| **Arrears Management** | Track overdue payments with severity levels |
+| **Installment Plans** | Configure payment plans per term with deadlines |
+| **Reports** | Daily, weekly, monthly, and term-based collection reports |
+| **Audit Trail** | Complete history of all transactions for accountability |
+
+### 🔒 Security & Data Safety
+
+- **Local-first storage** - Your data stays on your computer
+- **Encrypted sync** - When syncing online, all data is encrypted
+- **Role-based access** - Different permissions for bursars vs admins
+- **Automatic backups** - Local backups every hour
+- **Audit logs** - Every action is recorded with timestamps
+
+---
+
+## 📥 Download & Installation
+
+### Windows
+
+1. **Download** the installer: `EduPay-Ledger-Setup-1.0.0.exe`
+2. **Run** the installer (you may need to click "More info" → "Run anyway")
+3. **Launch** EduPay Ledger from your desktop or Start menu
+4. **Create account** or use demo mode to explore
+
+### macOS
+
+1. **Download** the disk image: `EduPay-Ledger-1.0.0.dmg`
+2. **Open** the DMG file
+3. **Drag** EduPay Ledger to your Applications folder
+4. **Launch** from Applications (first time: right-click → Open)
+
+### Linux
+
+```bash
+# Ubuntu/Debian
+sudo dpkg -i edupay-ledger_1.0.0_amd64.deb
+
+# Fedora/RHEL
+sudo rpm -i edupay-ledger-1.0.0.x86_64.rpm
+
+# AppImage (any distro)
+chmod +x EduPay-Ledger-1.0.0.AppImage
+./EduPay-Ledger-1.0.0.AppImage
+```
+
+---
+
+## 🚀 Quick Start Guide
+
+### First Time Setup
+
+1. **Launch the app** and click "Get Started"
+2. **Enter school details:**
+   - School name
+   - Location (District, Sub-county)
+   - Contact information
+3. **Set up fee structure:**
+   - Term fees by class
+   - Optional fees (lunch, transport, etc.)
+4. **Import or add students:**
+   - Import from Excel/CSV
+   - Or add students manually
+5. **Start recording payments!**
+
+### Recording a Payment
+
+```
+1. Click "Record Payment" or press Ctrl+P
+2. Search for student by name or ID
+3. Select payment method:
+   • Cash
+   • MTN Mobile Money (enter transaction ID)
+   • Airtel Money (enter transaction ID)
+   • Bank Transfer (enter reference)
+4. Enter amount
+5. Click "Record Payment"
+6. Receipt is automatically generated!
+```
+
+### Viewing Reports
+
+- **Dashboard** → Overview of today's collections
+- **Reports** → Detailed reports by date range
+- **Export** → Download as PDF or Excel
+
+---
+
+## ⚙️ How It Works
+
+### Offline Mode
+
+EduPay Ledger stores **all data locally** on your computer using IndexedDB. This means:
+
+✅ Works without internet connection  
+✅ Fast performance (no waiting for server)  
+✅ Your data is always accessible  
+✅ No monthly server costs  
+
+### Online Sync
+
+When internet is available, EduPay automatically:
+
+1. **Uploads** new payments and records to the cloud
+2. **Downloads** any changes from other devices
+3. **Resolves conflicts** using last-write-wins strategy
+4. **Backs up** your entire database
+
+### Sync Status Indicators
+
+| Icon | Status |
+|------|--------|
+| 🟢 | Online - All data synced |
+| 🟡 | Syncing - Upload/download in progress |
+| 🔴 | Offline - Working locally |
+| ⚠️ | Sync error - Will retry automatically |
+
+---
+
+## 👨‍💻 For Developers
+
+### Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Desktop Framework** | Electron 28 |
+| **Frontend** | Next.js 14, React 18, TypeScript |
+| **UI Components** | Tailwind CSS, Custom Design System |
+| **Local Database** | IndexedDB via Dexie.js |
+| **Cloud Sync** | Firebase Firestore |
+| **State Management** | Zustand |
+| **Forms & Validation** | React Hook Form + Zod |
 | **Testing** | Jest + React Testing Library |
-| **PWA** | next-pwa with Workbox |
 
----
-
-## Getting Started
-
-### Prerequisites
-
-- **Node.js** 18.x or higher
-- **npm** 9.x or higher
-- **Firebase** project (free Spark plan works for development)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/your-org/edupay-ledger.git
-   cd edupay-ledger
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-   ```
-   
-   Edit `.env.local` with your Firebase credentials:
-   ```env
-   NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-   NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-   ```
-
-4. **Run the development server**
-   ```bash
-   npm run dev
-   ```
-
-5. **Open the app**
-   
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-### Demo Mode
-
-Click **"Try Demo"** on the login page to explore the app without Firebase configuration. Demo mode uses mock data and local storage.
-
----
-
-## Project Structure
+### Project Structure
 
 ```
 edupay-ledger/
-├── app/                    # Next.js App Router pages
-│   ├── arrears/           # Arrears management
-│   ├── dashboard/         # Admin dashboard
-│   ├── login/             # Authentication
-│   ├── payments/          # Payment recording & rules
-│   ├── reports/           # Financial reports
-│   ├── settings/          # School settings & onboarding
-│   └── students/          # Student directory & profiles
+├── electron/                # Electron main process
+│   ├── main.ts             # App entry point
+│   ├── preload.ts          # Secure bridge to renderer
+│   └── updater.ts          # Auto-update logic
+├── app/                     # Next.js pages (App Router)
+│   ├── dashboard/          # Main dashboard
+│   ├── students/           # Student management
+│   ├── payments/           # Payment recording
+│   ├── arrears/            # Arrears tracking
+│   ├── reports/            # Financial reports
+│   └── settings/           # App settings
 ├── components/
-│   ├── navigation/        # Sidebar, TopNav
-│   └── ui/                # Reusable UI components
-│       ├── Button.tsx
-│       ├── Card.tsx
-│       ├── Input.tsx
-│       ├── Modal.tsx
-│       ├── Table.tsx
-│       └── ...
-├── contexts/              # React Context providers
-│   └── AuthContext.tsx    # Authentication state
-├── hooks/                 # Custom React hooks
-│   ├── useAuth.ts
-│   ├── useInstallments.ts
-│   └── useOffline.ts
-├── lib/                   # Utility libraries
-│   ├── firebase.ts        # Firebase initialization
-│   ├── stellar.ts         # Stellar blockchain integration
-│   └── utils.ts           # Helper functions
-├── services/
-│   └── firebase/          # Firebase Cloud Functions
-├── types/                 # TypeScript type definitions
-│   ├── payment.ts
-│   ├── school.ts
-│   ├── student.ts
-│   └── user.ts
-├── public/
-│   ├── icons/             # PWA icons
-│   ├── manifest.json      # PWA manifest
-│   ├── offline.html       # Offline fallback page
-│   └── sw.js              # Service worker
-└── __tests__/             # Jest test files
+│   ├── ui/                 # Reusable UI components
+│   └── navigation/         # Sidebar, TopNav
+├── lib/
+│   ├── db/                 # IndexedDB setup & queries
+│   ├── sync/               # Online sync logic
+│   ├── firebase.ts         # Firebase configuration
+│   └── utils.ts            # Helper functions
+├── hooks/                   # Custom React hooks
+├── types/                   # TypeScript definitions
+└── __tests__/              # Test files
 ```
 
----
-
-## Available Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm test` | Run Jest tests |
-| `npm run test:watch` | Run tests in watch mode |
-| `npm run test:coverage` | Run tests with coverage report |
-
----
-
-## API Reference
-
-### Authentication
-
-The app uses Firebase Authentication with the following methods:
-
-```typescript
-// Sign in with email/password
-await signIn(email: string, password: string)
-
-// Sign out
-await signOut()
-
-// Check permissions
-hasPermission(permission: Permission): boolean
-hasAnyPermission(permissions: Permission[]): boolean
-hasAllPermissions(permissions: Permission[]): boolean
-```
-
-### User Roles & Permissions
-
-| Role | Permissions |
-|------|-------------|
-| **Admin** | Full access to all features |
-| **Bursar** | Payments, reports, student finances |
-| **Teacher** | View students, record attendance payments |
-| **Parent** | View own children's balances |
-
-### Utility Functions
-
-```typescript
-// Currency formatting (UGX)
-formatCurrency(amount: number): string  // "UGX 1,500,000"
-formatCompact(amount: number): string   // "1.5M"
-
-// Date formatting
-formatDate(date: Date): string
-formatDateTime(date: Date): string
-formatRelativeTime(date: Date): string  // "2 hours ago"
-
-// ID generation
-generateReceiptNumber(): string  // "RCP-ABC123XY"
-generatePaymentId(): string      // "PAY-DEF456ZW"
-generateStudentId(): string      // "STU-GHI789AB"
-
-// Validation
-isValidUgandaPhone(phone: string): boolean
-formatPhone(phone: string): string
-```
-
----
-
-## Testing
-
-Run the test suite:
+### Development Setup
 
 ```bash
-# Run all tests
+# Clone the repository
+git clone https://github.com/your-org/edupay-ledger.git
+cd edupay-ledger
+
+# Install dependencies
+npm install
+
+# Run in development mode
+npm run dev              # Web version
+npm run electron:dev     # Desktop version
+
+# Run tests
 npm test
 
-# Run with coverage
-npm run test:coverage
-
-# Run in watch mode
-npm run test:watch
-
-# Run specific test file
-npm test -- __tests__/lib/utils.test.ts
+# Build for production
+npm run electron:build   # Creates installers for all platforms
 ```
 
-### Test Coverage
+### Environment Variables
 
-| Module | Coverage |
-|--------|----------|
-| Components | Button, Card |
-| Hooks | useAuth |
-| Utils | All utility functions |
-
----
-
-## Deployment
-
-### Vercel (Recommended)
-
-1. Push to GitHub
-2. Connect repository to [Vercel](https://vercel.com)
-3. Add environment variables in Vercel dashboard
-4. Deploy
-
-### Firebase Hosting
-
-```bash
-# Install Firebase CLI
-npm install -g firebase-tools
-
-# Login and initialize
-firebase login
-firebase init hosting
-
-# Build and deploy
-npm run build
-firebase deploy
-```
-
-### Environment Variables for Production
-
-Ensure these are set in your deployment platform:
+Create `.env.local` for development:
 
 ```env
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
+# Firebase (for cloud sync - optional for offline-only use)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
-# Optional: Stellar (for blockchain features)
-STELLAR_NETWORK=testnet
-STELLAR_SECRET_KEY=
+# App Configuration
+NEXT_PUBLIC_APP_MODE=desktop
+NEXT_PUBLIC_SYNC_ENABLED=true
+```
 
-# Optional: SMS Integration
-AFRICASTALKING_API_KEY=
-AFRICASTALKING_USERNAME=
+### Building Installers
+
+```bash
+# Windows (.exe installer)
+npm run electron:build:win
+
+# macOS (.dmg)
+npm run electron:build:mac
+
+# Linux (.deb, .rpm, .AppImage)
+npm run electron:build:linux
+
+# All platforms
+npm run electron:build:all
 ```
 
 ---
 
-## Roadmap
+## 💻 System Requirements
 
-- [x] Core dashboard and navigation
-- [x] Student management
-- [x] Payment recording
-- [x] Installment rules configuration
-- [x] Arrears tracking
-- [x] Demo mode for trials
-- [x] PWA with offline support
-- [ ] Firebase Firestore integration
-- [ ] Stellar blockchain payment proofs
-- [ ] SMS reminders via Africa's Talking
-- [ ] PDF report generation
-- [ ] Parent mobile app
+### Minimum Requirements
 
----
+| Component | Requirement |
+|-----------|-------------|
+| **OS** | Windows 10, macOS 10.14, Ubuntu 18.04 |
+| **RAM** | 4 GB |
+| **Storage** | 500 MB free space |
+| **Display** | 1280 x 720 resolution |
 
-## Contributing
+### Recommended
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Code Style
-
-- Use TypeScript strict mode
-- Follow ESLint configuration
-- Write tests for new features
-- Use conventional commits
+| Component | Recommendation |
+|-----------|----------------|
+| **OS** | Windows 11, macOS 12+, Ubuntu 22.04 |
+| **RAM** | 8 GB |
+| **Storage** | 1 GB free space (for large databases) |
+| **Display** | 1920 x 1080 resolution |
+| **Internet** | For cloud sync (not required for basic use) |
 
 ---
 
-## License
+## 🆘 Support
+
+### Getting Help
+
+- 📖 **User Guide**: Built into the app (Help → User Guide)
+- 📧 **Email Support**: support@edupay.ug
+- 💬 **WhatsApp**: +256 XXX XXX XXX
+- 🐛 **Report Issues**: [GitHub Issues](https://github.com/your-org/edupay-ledger/issues)
+
+### Frequently Asked Questions
+
+<details>
+<summary><strong>Can I use EduPay Ledger without internet?</strong></summary>
+
+Yes! EduPay Ledger is designed to work completely offline. All your data is stored locally on your computer. Internet is only needed for:
+- Initial setup (optional - you can use demo mode)
+- Syncing data to cloud backup
+- Accessing from multiple devices
+</details>
+
+<details>
+<summary><strong>What happens if my computer crashes?</strong></summary>
+
+If you have cloud sync enabled, all your data is safely backed up. Simply install EduPay Ledger on a new computer, log in with your account, and all data will sync automatically.
+
+If you're using offline-only mode, we recommend enabling automatic local backups (Settings → Backup → Enable Auto Backup).
+</details>
+
+<details>
+<summary><strong>Can multiple bursars use the same system?</strong></summary>
+
+Yes! With cloud sync enabled:
+- Each bursar installs the app on their computer
+- They log in with their account
+- Data syncs automatically between all devices
+- Conflict resolution handles simultaneous edits
+</details>
+
+<details>
+<summary><strong>How do I import existing student data?</strong></summary>
+
+Go to Students → Import → Upload Excel/CSV file. The app will guide you through mapping columns to the correct fields. Download our template for the correct format.
+</details>
+
+---
+
+## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## Support
+## 🙏 Acknowledgments
 
-- 📧 Email: support@edupay.ug
-- 📖 Documentation: [docs.edupay.ug](https://docs.edupay.ug)
-- 🐛 Issues: [GitHub Issues](https://github.com/your-org/edupay-ledger/issues)
+- Built for Ugandan schools with ❤️
+- Designed with input from school bursars across Uganda
+- Icons by [Material Design Icons](https://materialdesignicons.com/)
 
 ---
 
 <p align="center">
-  Made with ❤️ for Ugandan Schools
+  <strong>EduPay Ledger</strong> - Simplifying School Fee Management
+  <br>
+  <em>No Internet? No Problem.</em>
 </p>

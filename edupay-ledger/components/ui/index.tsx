@@ -9,6 +9,7 @@ export { Avatar, AvatarGroup } from './Avatar';
 export { Chip, FilterChip, TagChip } from './Chip';
 export { Modal, ConfirmModal } from './Modal';
 export { Table, Pagination } from './Table';
+export { SyncStatusIndicator } from './SyncStatusIndicator';
 
 // Table helper components for convenience
 export const TableHeader = ({ children, className = '' }: { children: React.ReactNode; className?: string }) => (

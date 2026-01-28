@@ -59,3 +59,15 @@ logs/
 
 # Build artifacts
 *.js.map
+
+# Electron
+electron/*.js
+electron/*.js.map
+electron/*.d.ts
+release/
+*.exe
+*.dmg
+*.deb
+*.rpm
+*.AppImage
+*.snap
