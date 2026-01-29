@@ -274,10 +274,10 @@ export function getCurrentUser(): FirebaseUser | null {
  * Google Auth Provider instance
  */
 const googleProvider = new GoogleAuthProvider();
-googleProvider.addScope('email');
-googleProvider.addScope('profile');
+googleProvider.addScope("email");
+googleProvider.addScope("profile");
 googleProvider.setCustomParameters({
-  prompt: 'select_account'
+  prompt: "select_account",
 });
 
 /**
@@ -290,9 +290,9 @@ export async function signInWithGoogle(): Promise<UserCredential> {
     return result;
   } catch (error: any) {
     // Handle popup blocked - fallback to redirect
-    if (error.code === 'auth/popup-blocked') {
+    if (error.code === "auth/popup-blocked") {
       await signInWithRedirect(auth, googleProvider);
-      throw new Error('Redirecting to Google sign-in...');
+      throw new Error("Redirecting to Google sign-in...");
     }
     throw error;
   }
@@ -318,7 +318,7 @@ export async function sendVerificationEmail(): Promise<void> {
   if (auth.currentUser) {
     return sendEmailVerification(auth.currentUser);
   }
-  throw new Error('No user is currently signed in');
+  throw new Error("No user is currently signed in");
 }
 
 /**
@@ -341,19 +341,22 @@ export async function updateUserPassword(newPassword: string): Promise<void> {
   if (auth.currentUser) {
     return updatePassword(auth.currentUser, newPassword);
   }
-  throw new Error('No user is currently signed in');
+  throw new Error("No user is currently signed in");
 }
 
 /**
  * Reauthenticate user before sensitive operations
  */
-export async function reauthenticateUser(email: string, password: string): Promise<UserCredential> {
+export async function reauthenticateUser(
+  email: string,
+  password: string,
+): Promise<UserCredential> {
   const { auth } = initializeFirebase();
   if (auth.currentUser) {
     const credential = EmailAuthProvider.credential(email, password);
     return reauthenticateWithCredential(auth.currentUser, credential);
   }
-  throw new Error('No user is currently signed in');
+  throw new Error("No user is currently signed in");
 }
 
 /**
@@ -369,56 +372,56 @@ export function validatePasswordStrength(password: string): {
   isValid: boolean;
   score: number;
   errors: string[];
-  strength: 'weak' | 'fair' | 'good' | 'strong';
+  strength: "weak" | "fair" | "good" | "strong";
 } {
   const errors: string[] = [];
   let score = 0;
-  
+
   // Length check
   if (password.length >= 8) {
     score += 1;
   } else {
-    errors.push('At least 8 characters required');
+    errors.push("At least 8 characters required");
   }
-  
+
   if (password.length >= 12) {
     score += 1;
   }
-  
+
   // Uppercase check
   if (/[A-Z]/.test(password)) {
     score += 1;
   } else {
-    errors.push('At least one uppercase letter required');
+    errors.push("At least one uppercase letter required");
   }
-  
+
   // Lowercase check
   if (/[a-z]/.test(password)) {
     score += 1;
   } else {
-    errors.push('At least one lowercase letter required');
+    errors.push("At least one lowercase letter required");
   }
-  
+
   // Number check
   if (/[0-9]/.test(password)) {
     score += 1;
   } else {
-    errors.push('At least one number required');
+    errors.push("At least one number required");
   }
-  
+
   // Special character check
   if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
     score += 1;
   } else {
-    errors.push('At least one special character required (!@#$%^&*...)');
+    errors.push("At least one special character required (!@#$%^&*...)");
   }
-  
+
   // Determine strength
-  let strength: 'weak' | 'fair' | 'good' | 'strong' = 'weak';
-  if (score >= 6) strength = 'strong';
-  else if (score >= 4) strength = 'good';
-  else if (score >= 3) strength = 'fair';
-  
+  let strength: "weak" | "fair" | "good" | "strong" = "weak";
+  if (score >= 6) strength = "strong";
+  else if (score >= 4) strength = "good";
+  else if (score >= 3) strength = "fair";
+
   return {
     isValid: errors.length === 0,
     score,
