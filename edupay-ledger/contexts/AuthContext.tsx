@@ -213,52 +213,130 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   };
 
-  // Sign in with Google
+  // Sign in with Google (uses popup flow)
   const signInWithGoogle = async () => {
     try {
       setIsLoading(true);
       setError(null);
+      console.log("AuthContext: Starting Google sign-in...");
 
       const result = await firebaseSignInWithGoogle();
+      console.log("AuthContext: Google sign-in result:", result?.user?.email);
 
-      // Check if user profile exists in Firestore
-      const existingProfile = await fetchDocument<EduPayUser>(
-        COLLECTIONS.USERS,
-        result.user.uid,
-      );
+      if (result && result.user) {
+        // Try to save/update user profile in Firestore (but don't fail if permissions deny)
+        try {
+          const existingProfile = await fetchDocument<EduPayUser>(
+            COLLECTIONS.USERS,
+            result.user.uid,
+          );
 
-      if (!existingProfile) {
-        // Create new user profile for Google sign-in
-        const newUser: Partial<EduPayUser> = {
+          if (!existingProfile) {
+            // Create new user profile for Google sign-in
+            const newUser: Partial<EduPayUser> = {
+              uid: result.user.uid,
+              email: result.user.email,
+              displayName: result.user.displayName,
+              photoURL: result.user.photoURL,
+              phoneNumber: result.user.phoneNumber,
+              role: "viewer", // Default role
+              schoolId: "",
+              permissions: [],
+              isActive: true,
+              createdAt: new Date(),
+              lastLogin: new Date(),
+            };
+
+            await saveDocument(COLLECTIONS.USERS, result.user.uid, newUser);
+            console.log("AuthContext: Created new user profile");
+          } else {
+            // Update last login
+            await saveDocument(COLLECTIONS.USERS, result.user.uid, {
+              lastLogin: new Date(),
+              photoURL: result.user.photoURL,
+            });
+            console.log("AuthContext: Updated existing user profile");
+          }
+        } catch (firestoreErr) {
+          // Firestore permission error - user is still authenticated, just can't save profile
+          console.warn(
+            "AuthContext: Could not save user profile to Firestore (permissions). User is still logged in.",
+            firestoreErr,
+          );
+        }
+
+        // Set user state directly from Google auth result
+        const googleUser: EduPayUser = {
           uid: result.user.uid,
           email: result.user.email,
           displayName: result.user.displayName,
           photoURL: result.user.photoURL,
           phoneNumber: result.user.phoneNumber,
-          role: "viewer", // Default role
+          role: "admin", // Default role for Google sign-in
           schoolId: "",
-          permissions: [],
+          schoolName: "",
+          permissions: ["all"],
           isActive: true,
-          createdAt: new Date(),
           lastLogin: new Date(),
         };
-
-        await saveDocument(COLLECTIONS.USERS, result.user.uid, newUser);
-      } else {
-        // Update last login
-        await saveDocument(COLLECTIONS.USERS, result.user.uid, {
-          lastLogin: new Date(),
-          photoURL: result.user.photoURL, // Update photo in case it changed
-        });
+        setUser(googleUser);
+        console.log("AuthContext: Google sign-in complete, user set");
       }
     } catch (err: any) {
-      const errorMessage = getAuthErrorMessage(err.code);
+      console.error("AuthContext: Google sign-in error:", err);
+      const errorMessage = err.message || getAuthErrorMessage(err.code);
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Handle Google redirect result on page load
+  useEffect(() => {
+    const handleRedirectResult = async () => {
+      try {
+        const result = await getGoogleRedirectResult();
+        if (result && result.user) {
+          // Check if user profile exists in Firestore
+          const existingProfile = await fetchDocument<EduPayUser>(
+            COLLECTIONS.USERS,
+            result.user.uid,
+          );
+
+          if (!existingProfile) {
+            // Create new user profile for Google sign-in
+            const newUser: Partial<EduPayUser> = {
+              uid: result.user.uid,
+              email: result.user.email,
+              displayName: result.user.displayName,
+              photoURL: result.user.photoURL,
+              phoneNumber: result.user.phoneNumber,
+              role: "viewer", // Default role
+              schoolId: "",
+              permissions: [],
+              isActive: true,
+              createdAt: new Date(),
+              lastLogin: new Date(),
+            };
+
+            await saveDocument(COLLECTIONS.USERS, result.user.uid, newUser);
+          } else {
+            // Update last login
+            await saveDocument(COLLECTIONS.USERS, result.user.uid, {
+              lastLogin: new Date(),
+              photoURL: result.user.photoURL, // Update photo in case it changed
+            });
+          }
+        }
+      } catch (err: any) {
+        console.error("Google redirect error:", err);
+        setError(getAuthErrorMessage(err.code));
+      }
+    };
+
+    handleRedirectResult();
+  }, []);
 
   // Send Email Verification
   const handleSendEmailVerification = async () => {

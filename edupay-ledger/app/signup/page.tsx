@@ -137,17 +137,15 @@ export default function SignupPage() {
     setError("");
 
     try {
+      // This will redirect to Google - user will be redirected back automatically
       await signInWithGoogle?.();
-      router.push("/dashboard");
+      // Note: router.push not needed here as signInWithGoogle uses redirect flow
     } catch (err) {
       const errorMessage =
         err instanceof Error
           ? err.message
           : "Google sign-up failed. Please try again.";
-      if (!errorMessage.includes("Redirecting")) {
-        setError(errorMessage);
-      }
-    } finally {
+      setError(errorMessage);
       setIsLoading(false);
     }
   };

@@ -281,19 +281,47 @@ googleProvider.setCustomParameters({
 });
 
 /**
- * Sign in with Google using popup
+ * Sign in with Google using popup (primary method)
  */
 export async function signInWithGoogle(): Promise<UserCredential> {
   const { auth } = initializeFirebase();
   try {
+    console.log("🔵 Starting Google sign-in with popup...");
+    console.log("🔵 Auth domain:", firebaseConfig.authDomain);
+    console.log(
+      "🔵 Current URL:",
+      typeof window !== "undefined" ? window.location.href : "SSR",
+    );
+
     const result = await signInWithPopup(auth, googleProvider);
+    console.log("✅ Google sign-in successful:", result.user.email);
     return result;
   } catch (error: any) {
-    // Handle popup blocked - fallback to redirect
+    console.error("❌ Google sign-in error code:", error.code);
+    console.error("❌ Google sign-in error message:", error.message);
+    console.error("❌ Full error:", error);
+
+    // Handle specific errors
     if (error.code === "auth/popup-blocked") {
+      console.log("⚠️ Popup blocked, trying redirect...");
       await signInWithRedirect(auth, googleProvider);
-      throw new Error("Redirecting to Google sign-in...");
+      throw new Error("Popup blocked. Redirecting to Google sign-in...");
     }
+
+    if (error.code === "auth/popup-closed-by-user") {
+      throw new Error("Sign-in cancelled. Please try again.");
+    }
+
+    if (error.code === "auth/cancelled-popup-request") {
+      throw new Error("Another sign-in is in progress.");
+    }
+
+    if (error.code === "auth/unauthorized-domain") {
+      throw new Error(
+        "This domain is not authorized. Please add localhost to Firebase Console → Authentication → Settings → Authorized domains.",
+      );
+    }
+
     throw error;
   }
 }
@@ -303,7 +331,16 @@ export async function signInWithGoogle(): Promise<UserCredential> {
  */
 export async function getGoogleRedirectResult(): Promise<UserCredential | null> {
   const { auth } = initializeFirebase();
-  return getRedirectResult(auth);
+  try {
+    const result = await getRedirectResult(auth);
+    if (result) {
+      console.log("Got redirect result:", result.user.email);
+    }
+    return result;
+  } catch (error: any) {
+    console.error("Redirect result error:", error);
+    throw error;
+  }
 }
 
 // ============================================================================

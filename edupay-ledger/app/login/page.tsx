@@ -87,16 +87,17 @@ export default function LoginPage() {
     setError("");
 
     try {
+      console.log("Initiating Google sign-in...");
       await signInWithGoogle?.();
+      console.log("Google sign-in completed, redirecting to dashboard...");
       router.push("/dashboard");
     } catch (err) {
+      console.error("Google login error:", err);
       const errorMessage =
         err instanceof Error
           ? err.message
           : "Google sign-in failed. Please try again.";
-      if (!errorMessage.includes("Redirecting")) {
-        setError(errorMessage);
-      }
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
