@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, use } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { Card, CardTitle } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -477,10 +477,9 @@ function AddStudentModal({
 export default function ClassDetailPage({
   params,
 }: {
-  params: Promise<{ classId: string }>;
+  params: { classId: string };
 }) {
-  const resolvedParams = use(params);
-  const classId = resolvedParams.classId;
+  const classId = params.classId;
 
   const {
     classes,
