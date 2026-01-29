@@ -1,68 +1,77 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
-import { useFirebaseAuth } from '@/contexts/AuthContext';
-import { validatePasswordStrength } from '@/lib/firebase';
+import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Card } from "@/components/ui/Card";
+import { useFirebaseAuth } from "@/contexts/AuthContext";
+import { validatePasswordStrength } from "@/lib/firebase";
 
 // Password strength indicator colors
 const strengthColors = {
-  weak: 'bg-red-500',
-  fair: 'bg-orange-500',
-  good: 'bg-yellow-500',
-  strong: 'bg-emerald-500',
+  weak: "bg-red-500",
+  fair: "bg-orange-500",
+  good: "bg-yellow-500",
+  strong: "bg-emerald-500",
 };
 
 const strengthLabels = {
-  weak: 'Weak',
-  fair: 'Fair',
-  good: 'Good',
-  strong: 'Strong',
+  weak: "Weak",
+  fair: "Fair",
+  good: "Good",
+  strong: "Strong",
 };
 
 export default function SignupPage() {
   const router = useRouter();
-  const { user, isLoading: authLoading, register, signInWithGoogle, error: authError, clearError } = useFirebaseAuth();
-  
+  const {
+    user,
+    isLoading: authLoading,
+    register,
+    signInWithGoogle,
+    error: authError,
+    clearError,
+  } = useFirebaseAuth();
+
   // Form state
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [schoolName, setSchoolName] = useState('');
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [schoolName, setSchoolName] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
-  
+
   // UI state
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [step, setStep] = useState<1 | 2>(1); // Multi-step form
-  
+
   // Password strength
-  const [passwordStrength, setPasswordStrength] = useState<ReturnType<typeof validatePasswordStrength>>({
+  const [passwordStrength, setPasswordStrength] = useState<
+    ReturnType<typeof validatePasswordStrength>
+  >({
     isValid: false,
     score: 0,
     errors: [],
-    strength: 'weak',
+    strength: "weak",
   });
 
   // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && user) {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   }, [user, authLoading, router]);
 
   // Clear errors on mount
   useEffect(() => {
     clearError?.();
-    setError('');
+    setError("");
   }, [clearError]);
 
   // Validate password on change
@@ -75,44 +84,47 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     // Validation
     if (!fullName.trim()) {
-      setError('Please enter your full name');
+      setError("Please enter your full name");
       setIsLoading(false);
       return;
     }
 
     if (!email.trim()) {
-      setError('Please enter your email address');
+      setError("Please enter your email address");
       setIsLoading(false);
       return;
     }
 
     if (!passwordStrength.isValid) {
-      setError('Please choose a stronger password');
+      setError("Please choose a stronger password");
       setIsLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       setIsLoading(false);
       return;
     }
 
     if (!agreedToTerms) {
-      setError('Please agree to the Terms of Service and Privacy Policy');
+      setError("Please agree to the Terms of Service and Privacy Policy");
       setIsLoading(false);
       return;
     }
 
     try {
-      await register(email, password, fullName, schoolName || 'pending');
-      router.push('/dashboard');
+      await register(email, password, fullName, schoolName || "pending");
+      router.push("/dashboard");
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create account. Please try again.';
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to create account. Please try again.";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -122,14 +134,17 @@ export default function SignupPage() {
   // Handle Google Sign-In
   const handleGoogleSignup = async () => {
     setIsLoading(true);
-    setError('');
+    setError("");
 
     try {
       await signInWithGoogle?.();
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Google sign-up failed. Please try again.';
-      if (!errorMessage.includes('Redirecting')) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Google sign-up failed. Please try again.";
+      if (!errorMessage.includes("Redirecting")) {
         setError(errorMessage);
       }
     } finally {
@@ -140,18 +155,18 @@ export default function SignupPage() {
   // Progress to next step
   const handleNextStep = () => {
     if (!fullName.trim() || !email.trim()) {
-      setError('Please fill in all required fields');
+      setError("Please fill in all required fields");
       return;
     }
-    
+
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
       return;
     }
-    
-    setError('');
+
+    setError("");
     setStep(2);
   };
 
@@ -161,7 +176,9 @@ export default function SignupPage() {
       <div className="min-h-screen bg-gradient-to-br from-primary via-primary/90 to-primary/80 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-white/10 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="material-symbols-outlined text-3xl text-white">school</span>
+            <span className="material-symbols-outlined text-3xl text-white">
+              school
+            </span>
           </div>
           <p className="text-white/60 text-sm">Loading...</p>
         </div>
@@ -175,16 +192,21 @@ export default function SignupPage() {
     <div className="min-h-screen bg-gradient-to-br from-primary via-primary/90 to-primary/80 flex items-center justify-center p-4">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        />
       </div>
 
       <div className="relative w-full max-w-md">
         {/* Logo & Title */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-white/10 backdrop-blur rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="material-symbols-outlined text-3xl text-white">school</span>
+            <span className="material-symbols-outlined text-3xl text-white">
+              school
+            </span>
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">EduPay Ledger</h1>
           <p className="text-white/60 text-sm">School Fee Management System</p>
@@ -196,8 +218,12 @@ export default function SignupPage() {
             <h2 className="text-xl font-bold">Create Account</h2>
             {/* Step indicator */}
             <div className="flex items-center gap-2">
-              <div className={`w-8 h-1 rounded-full transition-colors ${step >= 1 ? 'bg-primary' : 'bg-slate-200'}`} />
-              <div className={`w-8 h-1 rounded-full transition-colors ${step >= 2 ? 'bg-primary' : 'bg-slate-200'}`} />
+              <div
+                className={`w-8 h-1 rounded-full transition-colors ${step >= 1 ? "bg-primary" : "bg-slate-200"}`}
+              />
+              <div
+                className={`w-8 h-1 rounded-full transition-colors ${step >= 2 ? "bg-primary" : "bg-slate-200"}`}
+              />
             </div>
           </div>
 
@@ -237,7 +263,9 @@ export default function SignupPage() {
               <div className="w-full border-t border-slate-200 dark:border-slate-700" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white dark:bg-slate-900 px-2 text-slate-400">or with email</span>
+              <span className="bg-white dark:bg-slate-900 px-2 text-slate-400">
+                or with email
+              </span>
             </div>
           </div>
 
@@ -254,7 +282,11 @@ export default function SignupPage() {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="John Doe"
-                    icon={<span className="material-symbols-outlined text-sm">person</span>}
+                    icon={
+                      <span className="material-symbols-outlined text-sm">
+                        person
+                      </span>
+                    }
                     required
                   />
                 </div>
@@ -268,7 +300,11 @@ export default function SignupPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@school.ac.ug"
-                    icon={<span className="material-symbols-outlined text-sm">email</span>}
+                    icon={
+                      <span className="material-symbols-outlined text-sm">
+                        email
+                      </span>
+                    }
                     required
                   />
                 </div>
@@ -282,7 +318,11 @@ export default function SignupPage() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+256 7XX XXX XXX"
-                    icon={<span className="material-symbols-outlined text-sm">phone</span>}
+                    icon={
+                      <span className="material-symbols-outlined text-sm">
+                        phone
+                      </span>
+                    }
                   />
                 </div>
 
@@ -295,7 +335,11 @@ export default function SignupPage() {
                     value={schoolName}
                     onChange={(e) => setSchoolName(e.target.value)}
                     placeholder="St. Mary's Primary School"
-                    icon={<span className="material-symbols-outlined text-sm">apartment</span>}
+                    icon={
+                      <span className="material-symbols-outlined text-sm">
+                        apartment
+                      </span>
+                    }
                   />
                   <p className="text-xs text-slate-400 mt-1">
                     You can set up your school later in settings
@@ -305,7 +349,9 @@ export default function SignupPage() {
                 {displayError && (
                   <div className="p-3 bg-danger/10 border border-danger/20 rounded-lg">
                     <p className="text-sm text-danger flex items-center gap-2">
-                      <span className="material-symbols-outlined text-sm">error</span>
+                      <span className="material-symbols-outlined text-sm">
+                        error
+                      </span>
                       {displayError}
                     </p>
                   </div>
@@ -320,7 +366,9 @@ export default function SignupPage() {
                   disabled={isLoading}
                 >
                   Continue
-                  <span className="material-symbols-outlined text-sm ml-1">arrow_forward</span>
+                  <span className="material-symbols-outlined text-sm ml-1">
+                    arrow_forward
+                  </span>
                 </Button>
               </>
             )}
@@ -333,7 +381,9 @@ export default function SignupPage() {
                   onClick={() => setStep(1)}
                   className="flex items-center text-sm text-slate-500 hover:text-primary transition-colors mb-2"
                 >
-                  <span className="material-symbols-outlined text-sm mr-1">arrow_back</span>
+                  <span className="material-symbols-outlined text-sm mr-1">
+                    arrow_back
+                  </span>
                   Back to previous step
                 </button>
 
@@ -351,11 +401,15 @@ export default function SignupPage() {
                   </label>
                   <div className="relative">
                     <Input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={password}
                       onChange={(e) => handlePasswordChange(e.target.value)}
                       placeholder="Create a strong password"
-                      icon={<span className="material-symbols-outlined text-sm">lock</span>}
+                      icon={
+                        <span className="material-symbols-outlined text-sm">
+                          lock
+                        </span>
+                      }
                       required
                     />
                     <button
@@ -364,11 +418,11 @@ export default function SignupPage() {
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     >
                       <span className="material-symbols-outlined text-sm">
-                        {showPassword ? 'visibility_off' : 'visibility'}
+                        {showPassword ? "visibility_off" : "visibility"}
                       </span>
                     </button>
                   </div>
-                  
+
                   {/* Password Strength Indicator */}
                   {password && (
                     <div className="mt-2">
@@ -376,33 +430,65 @@ export default function SignupPage() {
                         <div className="flex-1 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                           <div
                             className={`h-full transition-all duration-300 ${strengthColors[passwordStrength.strength]}`}
-                            style={{ width: `${(passwordStrength.score / 6) * 100}%` }}
+                            style={{
+                              width: `${(passwordStrength.score / 6) * 100}%`,
+                            }}
                           />
                         </div>
-                        <span className={`text-xs font-medium ${
-                          passwordStrength.strength === 'strong' ? 'text-emerald-600' :
-                          passwordStrength.strength === 'good' ? 'text-yellow-600' :
-                          passwordStrength.strength === 'fair' ? 'text-orange-600' :
-                          'text-red-600'
-                        }`}>
+                        <span
+                          className={`text-xs font-medium ${
+                            passwordStrength.strength === "strong"
+                              ? "text-emerald-600"
+                              : passwordStrength.strength === "good"
+                                ? "text-yellow-600"
+                                : passwordStrength.strength === "fair"
+                                  ? "text-orange-600"
+                                  : "text-red-600"
+                          }`}
+                        >
                           {strengthLabels[passwordStrength.strength]}
                         </span>
                       </div>
-                      
+
                       {/* Password requirements */}
                       <div className="space-y-1">
                         {[
-                          { check: password.length >= 8, text: 'At least 8 characters' },
-                          { check: /[A-Z]/.test(password), text: 'One uppercase letter' },
-                          { check: /[a-z]/.test(password), text: 'One lowercase letter' },
-                          { check: /[0-9]/.test(password), text: 'One number' },
-                          { check: /[!@#$%^&*(),.?":{}|<>]/.test(password), text: 'One special character' },
+                          {
+                            check: password.length >= 8,
+                            text: "At least 8 characters",
+                          },
+                          {
+                            check: /[A-Z]/.test(password),
+                            text: "One uppercase letter",
+                          },
+                          {
+                            check: /[a-z]/.test(password),
+                            text: "One lowercase letter",
+                          },
+                          { check: /[0-9]/.test(password), text: "One number" },
+                          {
+                            check: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+                            text: "One special character",
+                          },
                         ].map((req, i) => (
-                          <div key={i} className="flex items-center gap-1.5 text-xs">
-                            <span className={`material-symbols-outlined text-xs ${req.check ? 'text-emerald-500' : 'text-slate-300'}`}>
-                              {req.check ? 'check_circle' : 'radio_button_unchecked'}
+                          <div
+                            key={i}
+                            className="flex items-center gap-1.5 text-xs"
+                          >
+                            <span
+                              className={`material-symbols-outlined text-xs ${req.check ? "text-emerald-500" : "text-slate-300"}`}
+                            >
+                              {req.check
+                                ? "check_circle"
+                                : "radio_button_unchecked"}
                             </span>
-                            <span className={req.check ? 'text-slate-600 dark:text-slate-400' : 'text-slate-400'}>
+                            <span
+                              className={
+                                req.check
+                                  ? "text-slate-600 dark:text-slate-400"
+                                  : "text-slate-400"
+                              }
+                            >
                               {req.text}
                             </span>
                           </div>
@@ -418,32 +504,42 @@ export default function SignupPage() {
                   </label>
                   <div className="relative">
                     <Input
-                      type={showConfirmPassword ? 'text' : 'password'}
+                      type={showConfirmPassword ? "text" : "password"}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="Confirm your password"
-                      icon={<span className="material-symbols-outlined text-sm">lock</span>}
+                      icon={
+                        <span className="material-symbols-outlined text-sm">
+                          lock
+                        </span>
+                      }
                       required
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                     >
                       <span className="material-symbols-outlined text-sm">
-                        {showConfirmPassword ? 'visibility_off' : 'visibility'}
+                        {showConfirmPassword ? "visibility_off" : "visibility"}
                       </span>
                     </button>
                   </div>
                   {confirmPassword && password !== confirmPassword && (
                     <p className="text-xs text-red-500 mt-1 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-xs">error</span>
+                      <span className="material-symbols-outlined text-xs">
+                        error
+                      </span>
                       Passwords do not match
                     </p>
                   )}
                   {confirmPassword && password === confirmPassword && (
                     <p className="text-xs text-emerald-500 mt-1 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-xs">check_circle</span>
+                      <span className="material-symbols-outlined text-xs">
+                        check_circle
+                      </span>
                       Passwords match
                     </p>
                   )}
@@ -459,12 +555,18 @@ export default function SignupPage() {
                     className="mt-1 w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary"
                   />
                   <label htmlFor="terms" className="text-xs text-slate-500">
-                    I agree to the{' '}
-                    <Link href="/terms" className="text-primary hover:underline">
+                    I agree to the{" "}
+                    <Link
+                      href="/terms"
+                      className="text-primary hover:underline"
+                    >
                       Terms of Service
-                    </Link>{' '}
-                    and{' '}
-                    <Link href="/privacy" className="text-primary hover:underline">
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      href="/privacy"
+                      className="text-primary hover:underline"
+                    >
                       Privacy Policy
                     </Link>
                   </label>
@@ -473,7 +575,9 @@ export default function SignupPage() {
                 {displayError && (
                   <div className="p-3 bg-danger/10 border border-danger/20 rounded-lg">
                     <p className="text-sm text-danger flex items-center gap-2">
-                      <span className="material-symbols-outlined text-sm">error</span>
+                      <span className="material-symbols-outlined text-sm">
+                        error
+                      </span>
                       {displayError}
                     </p>
                   </div>
@@ -485,9 +589,13 @@ export default function SignupPage() {
                   fullWidth
                   size="lg"
                   loading={isLoading}
-                  disabled={!passwordStrength.isValid || password !== confirmPassword || !agreedToTerms}
+                  disabled={
+                    !passwordStrength.isValid ||
+                    password !== confirmPassword ||
+                    !agreedToTerms
+                  }
                 >
-                  {isLoading ? 'Creating Account...' : 'Create Account'}
+                  {isLoading ? "Creating Account..." : "Create Account"}
                 </Button>
               </>
             )}
@@ -495,8 +603,11 @@ export default function SignupPage() {
 
           {/* Sign In Link */}
           <p className="text-center text-sm text-slate-500 mt-6">
-            Already have an account?{' '}
-            <Link href="/login" className="text-primary font-medium hover:underline">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="text-primary font-medium hover:underline"
+            >
               Sign In
             </Link>
           </p>
