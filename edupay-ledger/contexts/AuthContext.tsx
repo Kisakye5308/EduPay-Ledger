@@ -1,24 +1,33 @@
-'use client';
+"use client";
 
 /**
  * Firebase Context Provider for EduPay Ledger
  * Provides Firebase authentication state and user data throughout the app
  */
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { 
-  initializeFirebase, 
-  onAuthChange, 
-  signInWithEmail, 
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import {
+  initializeFirebase,
+  onAuthChange,
+  signInWithEmail,
   signOutUser,
   createUser,
   resetPassword,
   getCurrentUser,
   fetchDocument,
   saveDocument,
-  COLLECTIONS
-} from '@/lib/firebase';
-import type { User as FirebaseUser } from 'firebase/auth';
+  COLLECTIONS,
+  signInWithGoogle as firebaseSignInWithGoogle,
+  getGoogleRedirectResult,
+  sendVerificationEmail,
+} from "@/lib/firebase";
+import type { User as FirebaseUser } from "firebase/auth";
 
 // ============================================================================
 // TYPES
@@ -30,7 +39,7 @@ export interface EduPayUser {
   displayName: string | null;
   photoURL: string | null;
   phoneNumber: string | null;
-  role: 'admin' | 'bursar' | 'registrar' | 'teacher' | 'viewer';
+  role: "admin" | "bursar" | "registrar" | "teacher" | "viewer";
   schoolId: string;
   schoolName?: string;
   permissions: string[];
@@ -47,19 +56,26 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isDemoMode: boolean;
   error: string | null;
-  
+
   // Actions
   login: (email: string, password: string) => Promise<void>;
   loginAsDemo: () => Promise<void>;
   logout: () => Promise<void>;
-  register: (email: string, password: string, displayName: string, schoolId: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    displayName: string,
+    schoolId: string,
+  ) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
   forgotPassword: (email: string) => Promise<void>;
+  sendEmailVerification: () => Promise<void>;
   clearError: () => void;
   refreshUser: () => Promise<void>;
-  
+
   // Permission checks
   hasPermission: (permission: string) => boolean;
-  hasRole: (role: EduPayUser['role'] | EduPayUser['role'][]) => boolean;
+  hasRole: (role: EduPayUser["role"] | EduPayUser["role"][]) => boolean;
 }
 
 // ============================================================================
@@ -81,24 +97,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Demo user for trial mode
   const DEMO_USER: EduPayUser = {
-    uid: 'demo-user-001',
-    email: 'demo@edupay.ug',
-    displayName: 'Demo Admin',
+    uid: "demo-user-001",
+    email: "demo@edupay.ug",
+    displayName: "Demo Admin",
     photoURL: null,
-    phoneNumber: '+256700000000',
-    role: 'admin',
-    schoolId: 'demo-school-001',
-    schoolName: 'Demo Primary School',
-    permissions: ['all'],
+    phoneNumber: "+256700000000",
+    role: "admin",
+    schoolId: "demo-school-001",
+    schoolName: "Demo Primary School",
+    permissions: ["all"],
     isActive: true,
     lastLogin: new Date(),
-    createdAt: new Date('2024-01-01'),
+    createdAt: new Date("2024-01-01"),
   };
 
   // Check for demo mode in localStorage on mount
   useEffect(() => {
-    const savedDemoMode = localStorage.getItem('edupay_demo_mode');
-    if (savedDemoMode === 'true') {
+    const savedDemoMode = localStorage.getItem("edupay_demo_mode");
+    if (savedDemoMode === "true") {
       setIsDemoMode(true);
       setUser(DEMO_USER);
       setIsLoading(false);
@@ -109,17 +125,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Skip Firebase auth if in demo mode
     if (isDemoMode) return;
-    
+
     initializeFirebase();
-    
+
     const unsubscribe = onAuthChange(async (fbUser) => {
       setFirebaseUser(fbUser);
-      
+
       if (fbUser) {
         try {
           // Fetch user profile from Firestore
-          const userProfile = await fetchDocument<EduPayUser>(COLLECTIONS.USERS, fbUser.uid);
-          
+          const userProfile = await fetchDocument<EduPayUser>(
+            COLLECTIONS.USERS,
+            fbUser.uid,
+          );
+
           if (userProfile) {
             setUser({
               ...userProfile,
@@ -137,21 +156,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               displayName: fbUser.displayName,
               photoURL: fbUser.photoURL,
               phoneNumber: fbUser.phoneNumber,
-              role: 'viewer',
-              schoolId: '',
+              role: "viewer",
+              schoolId: "",
               permissions: [],
               isActive: true,
             };
             setUser(newUser);
           }
         } catch (err) {
-          console.error('Error fetching user profile:', err);
-          setError('Failed to load user profile');
+          console.error("Error fetching user profile:", err);
+          setError("Failed to load user profile");
         }
       } else {
         setUser(null);
       }
-      
+
       setIsLoading(false);
     });
 
@@ -164,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true);
       setError(null);
       await signInWithEmail(email, password);
-      
+
       // Update last login timestamp
       const currentUser = getCurrentUser();
       if (currentUser) {
@@ -185,13 +204,76 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loginAsDemo = async () => {
     setIsLoading(true);
     setError(null);
-    
+
     // Set demo mode
     setIsDemoMode(true);
     setUser(DEMO_USER);
-    localStorage.setItem('edupay_demo_mode', 'true');
-    
+    localStorage.setItem("edupay_demo_mode", "true");
+
     setIsLoading(false);
+  };
+
+  // Sign in with Google
+  const signInWithGoogle = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const result = await firebaseSignInWithGoogle();
+
+      // Check if user profile exists in Firestore
+      const existingProfile = await fetchDocument<EduPayUser>(
+        COLLECTIONS.USERS,
+        result.user.uid,
+      );
+
+      if (!existingProfile) {
+        // Create new user profile for Google sign-in
+        const newUser: Partial<EduPayUser> = {
+          uid: result.user.uid,
+          email: result.user.email,
+          displayName: result.user.displayName,
+          photoURL: result.user.photoURL,
+          phoneNumber: result.user.phoneNumber,
+          role: "viewer", // Default role
+          schoolId: "",
+          permissions: [],
+          isActive: true,
+          createdAt: new Date(),
+          lastLogin: new Date(),
+        };
+
+        await saveDocument(COLLECTIONS.USERS, result.user.uid, newUser);
+      } else {
+        // Update last login
+        await saveDocument(COLLECTIONS.USERS, result.user.uid, {
+          lastLogin: new Date(),
+          photoURL: result.user.photoURL, // Update photo in case it changed
+        });
+      }
+    } catch (err: any) {
+      const errorMessage = getAuthErrorMessage(err.code);
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Send Email Verification
+  const handleSendEmailVerification = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await sendVerificationEmail();
+    } catch (err: any) {
+      const errorMessage =
+        "Failed to send verification email. Please try again.";
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Logout
@@ -199,20 +281,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Clear demo mode if active
       if (isDemoMode) {
         setIsDemoMode(false);
-        localStorage.removeItem('edupay_demo_mode');
+        localStorage.removeItem("edupay_demo_mode");
         setUser(null);
         setIsLoading(false);
         return;
       }
-      
+
       await signOutUser();
       setUser(null);
     } catch (err: any) {
-      setError('Failed to sign out');
+      setError("Failed to sign out");
       throw err;
     } finally {
       setIsLoading(false);
@@ -220,25 +302,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   // Register
-  const register = async (email: string, password: string, displayName: string, schoolId: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    displayName: string,
+    schoolId: string,
+  ) => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const credential = await createUser(email, password, displayName);
-      
+
       // Create user profile in Firestore
       const newUser: Partial<EduPayUser> = {
         uid: credential.user.uid,
         email: credential.user.email,
         displayName,
-        role: 'viewer', // Default role, admin will upgrade
+        role: "viewer", // Default role, admin will upgrade
         schoolId,
         permissions: [],
         isActive: true,
         createdAt: new Date(),
       };
-      
+
       await saveDocument(COLLECTIONS.USERS, credential.user.uid, newUser);
     } catch (err: any) {
       const errorMessage = getAuthErrorMessage(err.code);
@@ -270,7 +357,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Refresh User
   const refreshUser = async () => {
     if (firebaseUser) {
-      const userProfile = await fetchDocument<EduPayUser>(COLLECTIONS.USERS, firebaseUser.uid);
+      const userProfile = await fetchDocument<EduPayUser>(
+        COLLECTIONS.USERS,
+        firebaseUser.uid,
+      );
       if (userProfile) {
         setUser({
           ...userProfile,
@@ -287,12 +377,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Check Permission
   const hasPermission = (permission: string): boolean => {
     if (!user) return false;
-    if (user.role === 'admin') return true;
-    return user.permissions.includes(permission) || user.permissions.includes('all');
+    if (user.role === "admin") return true;
+    return (
+      user.permissions.includes(permission) || user.permissions.includes("all")
+    );
   };
 
   // Check Role
-  const hasRole = (role: EduPayUser['role'] | EduPayUser['role'][]): boolean => {
+  const hasRole = (
+    role: EduPayUser["role"] | EduPayUser["role"][],
+  ): boolean => {
     if (!user) return false;
     if (Array.isArray(role)) {
       return role.includes(user.role);
@@ -311,18 +405,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loginAsDemo,
     logout,
     register,
+    signInWithGoogle,
     forgotPassword,
+    sendEmailVerification: handleSendEmailVerification,
     clearError,
     refreshUser,
     hasPermission,
     hasRole,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 // ============================================================================
@@ -332,7 +424,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useFirebaseAuth(): AuthContextType {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useFirebaseAuth must be used within an AuthProvider');
+    throw new Error("useFirebaseAuth must be used within an AuthProvider");
   }
   return context;
 }
@@ -343,19 +435,20 @@ export function useFirebaseAuth(): AuthContextType {
 
 function getAuthErrorMessage(code: string): string {
   const errorMessages: Record<string, string> = {
-    'auth/invalid-email': 'Invalid email address.',
-    'auth/user-disabled': 'This account has been disabled.',
-    'auth/user-not-found': 'No account found with this email.',
-    'auth/wrong-password': 'Incorrect password.',
-    'auth/email-already-in-use': 'An account already exists with this email.',
-    'auth/weak-password': 'Password should be at least 6 characters.',
-    'auth/operation-not-allowed': 'This sign-in method is not allowed.',
-    'auth/too-many-requests': 'Too many attempts. Please try again later.',
-    'auth/network-request-failed': 'Network error. Please check your connection.',
-    'auth/invalid-credential': 'Invalid email or password.',
+    "auth/invalid-email": "Invalid email address.",
+    "auth/user-disabled": "This account has been disabled.",
+    "auth/user-not-found": "No account found with this email.",
+    "auth/wrong-password": "Incorrect password.",
+    "auth/email-already-in-use": "An account already exists with this email.",
+    "auth/weak-password": "Password should be at least 6 characters.",
+    "auth/operation-not-allowed": "This sign-in method is not allowed.",
+    "auth/too-many-requests": "Too many attempts. Please try again later.",
+    "auth/network-request-failed":
+      "Network error. Please check your connection.",
+    "auth/invalid-credential": "Invalid email or password.",
   };
-  
-  return errorMessages[code] || 'An error occurred. Please try again.';
+
+  return errorMessages[code] || "An error occurred. Please try again.";
 }
 
 // ============================================================================
@@ -364,36 +457,36 @@ function getAuthErrorMessage(code: string): string {
 
 export const PERMISSIONS = {
   // Students
-  STUDENTS_VIEW: 'students:view',
-  STUDENTS_CREATE: 'students:create',
-  STUDENTS_EDIT: 'students:edit',
-  STUDENTS_DELETE: 'students:delete',
-  
+  STUDENTS_VIEW: "students:view",
+  STUDENTS_CREATE: "students:create",
+  STUDENTS_EDIT: "students:edit",
+  STUDENTS_DELETE: "students:delete",
+
   // Payments
-  PAYMENTS_VIEW: 'payments:view',
-  PAYMENTS_RECORD: 'payments:record',
-  PAYMENTS_REVERSE: 'payments:reverse',
-  PAYMENTS_EXPORT: 'payments:export',
-  
+  PAYMENTS_VIEW: "payments:view",
+  PAYMENTS_RECORD: "payments:record",
+  PAYMENTS_REVERSE: "payments:reverse",
+  PAYMENTS_EXPORT: "payments:export",
+
   // Reports
-  REPORTS_VIEW: 'reports:view',
-  REPORTS_GENERATE: 'reports:generate',
-  REPORTS_EXPORT: 'reports:export',
-  
+  REPORTS_VIEW: "reports:view",
+  REPORTS_GENERATE: "reports:generate",
+  REPORTS_EXPORT: "reports:export",
+
   // Settings
-  SETTINGS_VIEW: 'settings:view',
-  SETTINGS_EDIT: 'settings:edit',
-  
+  SETTINGS_VIEW: "settings:view",
+  SETTINGS_EDIT: "settings:edit",
+
   // Users
-  USERS_VIEW: 'users:view',
-  USERS_MANAGE: 'users:manage',
-  
+  USERS_VIEW: "users:view",
+  USERS_MANAGE: "users:manage",
+
   // Audit
-  AUDIT_VIEW: 'audit:view',
+  AUDIT_VIEW: "audit:view",
 } as const;
 
-export const ROLE_PERMISSIONS: Record<EduPayUser['role'], string[]> = {
-  admin: ['all'],
+export const ROLE_PERMISSIONS: Record<EduPayUser["role"], string[]> = {
+  admin: ["all"],
   bursar: [
     PERMISSIONS.STUDENTS_VIEW,
     PERMISSIONS.PAYMENTS_VIEW,
@@ -409,10 +502,7 @@ export const ROLE_PERMISSIONS: Record<EduPayUser['role'], string[]> = {
     PERMISSIONS.STUDENTS_EDIT,
     PERMISSIONS.PAYMENTS_VIEW,
   ],
-  teacher: [
-    PERMISSIONS.STUDENTS_VIEW,
-    PERMISSIONS.PAYMENTS_VIEW,
-  ],
+  teacher: [PERMISSIONS.STUDENTS_VIEW, PERMISSIONS.PAYMENTS_VIEW],
   viewer: [
     PERMISSIONS.STUDENTS_VIEW,
     PERMISSIONS.PAYMENTS_VIEW,
