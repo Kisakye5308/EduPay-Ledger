@@ -2,7 +2,7 @@
 
 import { AuthenticatedLayout } from "@/components/layouts/AuthenticatedLayout";
 
-export default function ClearanceLayout({
+export default function ClassesLayout({
   children,
 }: {
   children: React.ReactNode;

@@ -4,10 +4,10 @@
  */
 
 // Import Jest DOM matchers
-import '@testing-library/jest-dom';
+import "@testing-library/jest-dom";
 
 // Mock Next.js router
-jest.mock('next/navigation', () => ({
+jest.mock("next/navigation", () => ({
   useRouter: () => ({
     push: jest.fn(),
     replace: jest.fn(),
@@ -16,19 +16,19 @@ jest.mock('next/navigation', () => ({
     forward: jest.fn(),
     refresh: jest.fn(),
   }),
-  usePathname: () => '/',
+  usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
   useParams: () => ({}),
 }));
 
 // Mock Firebase
-jest.mock('firebase/app', () => ({
+jest.mock("firebase/app", () => ({
   initializeApp: jest.fn(() => ({})),
   getApps: jest.fn(() => []),
   getApp: jest.fn(() => ({})),
 }));
 
-jest.mock('firebase/auth', () => ({
+jest.mock("firebase/auth", () => ({
   getAuth: jest.fn(() => ({})),
   signInWithEmailAndPassword: jest.fn(),
   signOut: jest.fn(),
@@ -38,7 +38,7 @@ jest.mock('firebase/auth', () => ({
   }),
 }));
 
-jest.mock('firebase/firestore', () => ({
+jest.mock("firebase/firestore", () => ({
   getFirestore: jest.fn(() => ({})),
   collection: jest.fn(),
   doc: jest.fn(),
@@ -61,9 +61,9 @@ jest.mock('firebase/firestore', () => ({
 }));
 
 // Mock window.matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
-  value: jest.fn().mockImplementation(query => ({
+  value: jest.fn().mockImplementation((query) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -78,17 +78,29 @@ Object.defineProperty(window, 'matchMedia', {
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
   constructor() {}
-  observe() { return null; }
-  unobserve() { return null; }
-  disconnect() { return null; }
+  observe() {
+    return null;
+  }
+  unobserve() {
+    return null;
+  }
+  disconnect() {
+    return null;
+  }
 };
 
 // Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
   constructor() {}
-  observe() { return null; }
-  unobserve() { return null; }
-  disconnect() { return null; }
+  observe() {
+    return null;
+  }
+  unobserve() {
+    return null;
+  }
+  disconnect() {
+    return null;
+  }
 };
 
 // Suppress console errors during tests (optional)
@@ -96,8 +108,8 @@ const originalError = console.error;
 beforeAll(() => {
   console.error = (...args) => {
     if (
-      typeof args[0] === 'string' &&
-      args[0].includes('Warning: ReactDOM.render is no longer supported')
+      typeof args[0] === "string" &&
+      args[0].includes("Warning: ReactDOM.render is no longer supported")
     ) {
       return;
     }
