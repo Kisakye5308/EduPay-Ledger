@@ -1,7 +1,7 @@
 /**
  * Firebase Configuration for EduPay Ledger
  * School Fee Management System for Ugandan Schools
- * 
+ *
  * This module provides:
  * - Firebase App initialization with offline persistence
  * - Authentication (Email/Password + Phone for Uganda)
@@ -11,25 +11,33 @@
  * - Analytics for usage tracking
  */
 
-import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
-import { 
-  getAuth, 
-  Auth, 
+import { initializeApp, getApps, FirebaseApp } from "firebase/app";
+import {
+  getAuth,
+  Auth,
   connectAuthEmulator,
   signInWithEmailAndPassword,
   signInWithPhoneNumber,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  sendEmailVerification,
   updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   signOut,
   onAuthStateChanged,
   RecaptchaVerifier,
   User as FirebaseUser,
-  UserCredential
-} from 'firebase/auth';
-import { 
-  getFirestore, 
-  Firestore, 
+  UserCredential,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+} from "firebase/auth";
+import {
+  getFirestore,
+  Firestore,
   connectFirestoreEmulator,
   initializeFirestore,
   persistentLocalCache,
@@ -53,11 +61,23 @@ import {
   onSnapshot,
   DocumentReference,
   CollectionReference,
-  QueryConstraint
-} from 'firebase/firestore';
-import { getFunctions, Functions, connectFunctionsEmulator, httpsCallable } from 'firebase/functions';
-import { getStorage, FirebaseStorage, connectStorageEmulator, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getAnalytics, Analytics, isSupported } from 'firebase/analytics';
+  QueryConstraint,
+} from "firebase/firestore";
+import {
+  getFunctions,
+  Functions,
+  connectFunctionsEmulator,
+  httpsCallable,
+} from "firebase/functions";
+import {
+  getStorage,
+  FirebaseStorage,
+  connectStorageEmulator,
+  ref,
+  uploadBytes,
+  getDownloadURL,
+} from "firebase/storage";
+import { getAnalytics, Analytics, isSupported } from "firebase/analytics";
 
 // ============================================================================
 // FIREBASE CONFIGURATION
@@ -68,13 +88,23 @@ import { getAnalytics, Analytics, isSupported } from 'firebase/analytics';
  * These values connect to the edu-pay-ledger Firebase project
  */
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY || "AIzaSyD_rkeL7gDD-4uWXR6CGnwEyW42t20qyHg",
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "edu-pay-ledger.firebaseapp.com",
+  apiKey:
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
+    "AIzaSyD_rkeL7gDD-4uWXR6CGnwEyW42t20qyHg",
+  authDomain:
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
+    "edu-pay-ledger.firebaseapp.com",
   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "edu-pay-ledger",
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET || "edu-pay-ledger.firebasestorage.app",
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "725803373518",
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || "1:725803373518:web:88eceae685240408e6519f",
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-KN0JN93B48"
+  storageBucket:
+    process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
+    "edu-pay-ledger.firebasestorage.app",
+  messagingSenderId:
+    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "725803373518",
+  appId:
+    process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
+    "1:725803373518:web:88eceae685240408e6519f",
+  measurementId:
+    process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-KN0JN93B48",
 };
 
 // ============================================================================
@@ -96,17 +126,17 @@ export function initializeFirebase() {
   if (getApps().length === 0) {
     // Initialize Firebase App
     app = initializeApp(firebaseConfig);
-    
+
     // Initialize Auth
     auth = getAuth(app);
-    
+
     // Initialize Firestore with offline persistence (client-side only)
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       try {
         db = initializeFirestore(app, {
           localCache: persistentLocalCache({
-            tabManager: persistentMultipleTabManager()
-          })
+            tabManager: persistentMultipleTabManager(),
+          }),
         });
       } catch (e) {
         // Firestore already initialized, get existing instance
@@ -115,32 +145,37 @@ export function initializeFirebase() {
     } else {
       db = getFirestore(app);
     }
-    
+
     // Initialize Functions
     functions = getFunctions(app);
-    
+
     // Initialize Storage
     storage = getStorage(app);
-    
+
     // Initialize Analytics (client-side only, check if supported)
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       isSupported().then((supported) => {
         if (supported) {
           analytics = getAnalytics(app);
         }
       });
     }
-    
+
     // Connect to emulators in development (optional)
-    if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_EMULATORS === 'true') {
-      connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
-      connectFirestoreEmulator(db, 'localhost', 8080);
-      connectFunctionsEmulator(functions, 'localhost', 5001);
-      connectStorageEmulator(storage, 'localhost', 9199);
-      console.log('🔧 Connected to Firebase Emulators');
+    if (
+      process.env.NODE_ENV === "development" &&
+      process.env.NEXT_PUBLIC_USE_EMULATORS === "true"
+    ) {
+      connectAuthEmulator(auth, "http://localhost:9099", {
+        disableWarnings: true,
+      });
+      connectFirestoreEmulator(db, "localhost", 8080);
+      connectFunctionsEmulator(functions, "localhost", 5001);
+      connectStorageEmulator(storage, "localhost", 9199);
+      console.log("🔧 Connected to Firebase Emulators");
     }
-    
-    console.log('✅ Firebase initialized successfully for EduPay Ledger');
+
+    console.log("✅ Firebase initialized successfully for EduPay Ledger");
   } else {
     // Get existing instances
     app = getApps()[0];
@@ -149,12 +184,12 @@ export function initializeFirebase() {
     functions = getFunctions(app);
     storage = getStorage(app);
   }
-  
+
   return { app, auth, db, functions, storage, analytics };
 }
 
 // Initialize on module load (client-side only)
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   initializeFirebase();
 }
 
@@ -168,7 +203,10 @@ export { app, auth, db, functions, storage, analytics };
 /**
  * Sign in with email and password
  */
-export async function signInWithEmail(email: string, password: string): Promise<UserCredential> {
+export async function signInWithEmail(
+  email: string,
+  password: string,
+): Promise<UserCredential> {
   const { auth } = initializeFirebase();
   return signInWithEmailAndPassword(auth, email, password);
 }
@@ -176,9 +214,17 @@ export async function signInWithEmail(email: string, password: string): Promise<
 /**
  * Create a new user account
  */
-export async function createUser(email: string, password: string, displayName: string): Promise<UserCredential> {
+export async function createUser(
+  email: string,
+  password: string,
+  displayName: string,
+): Promise<UserCredential> {
   const { auth } = initializeFirebase();
-  const credential = await createUserWithEmailAndPassword(auth, email, password);
+  const credential = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    password,
+  );
   if (credential.user) {
     await updateProfile(credential.user, { displayName });
   }
@@ -205,7 +251,9 @@ export async function signOutUser(): Promise<void> {
 /**
  * Listen to authentication state changes
  */
-export function onAuthChange(callback: (user: FirebaseUser | null) => void): () => void {
+export function onAuthChange(
+  callback: (user: FirebaseUser | null) => void,
+): () => void {
   const { auth } = initializeFirebase();
   return onAuthStateChanged(auth, callback);
 }
@@ -219,6 +267,167 @@ export function getCurrentUser(): FirebaseUser | null {
 }
 
 // ============================================================================
+// GOOGLE AUTHENTICATION
+// ============================================================================
+
+/**
+ * Google Auth Provider instance
+ */
+const googleProvider = new GoogleAuthProvider();
+googleProvider.addScope('email');
+googleProvider.addScope('profile');
+googleProvider.setCustomParameters({
+  prompt: 'select_account'
+});
+
+/**
+ * Sign in with Google using popup
+ */
+export async function signInWithGoogle(): Promise<UserCredential> {
+  const { auth } = initializeFirebase();
+  try {
+    const result = await signInWithPopup(auth, googleProvider);
+    return result;
+  } catch (error: any) {
+    // Handle popup blocked - fallback to redirect
+    if (error.code === 'auth/popup-blocked') {
+      await signInWithRedirect(auth, googleProvider);
+      throw new Error('Redirecting to Google sign-in...');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Get result from redirect sign-in (call on page load)
+ */
+export async function getGoogleRedirectResult(): Promise<UserCredential | null> {
+  const { auth } = initializeFirebase();
+  return getRedirectResult(auth);
+}
+
+// ============================================================================
+// EMAIL VERIFICATION
+// ============================================================================
+
+/**
+ * Send email verification to current user
+ */
+export async function sendVerificationEmail(): Promise<void> {
+  const { auth } = initializeFirebase();
+  if (auth.currentUser) {
+    return sendEmailVerification(auth.currentUser);
+  }
+  throw new Error('No user is currently signed in');
+}
+
+/**
+ * Check if current user's email is verified
+ */
+export function isEmailVerified(): boolean {
+  const { auth } = initializeFirebase();
+  return auth.currentUser?.emailVerified ?? false;
+}
+
+// ============================================================================
+// PASSWORD MANAGEMENT
+// ============================================================================
+
+/**
+ * Update user's password (requires recent authentication)
+ */
+export async function updateUserPassword(newPassword: string): Promise<void> {
+  const { auth } = initializeFirebase();
+  if (auth.currentUser) {
+    return updatePassword(auth.currentUser, newPassword);
+  }
+  throw new Error('No user is currently signed in');
+}
+
+/**
+ * Reauthenticate user before sensitive operations
+ */
+export async function reauthenticateUser(email: string, password: string): Promise<UserCredential> {
+  const { auth } = initializeFirebase();
+  if (auth.currentUser) {
+    const credential = EmailAuthProvider.credential(email, password);
+    return reauthenticateWithCredential(auth.currentUser, credential);
+  }
+  throw new Error('No user is currently signed in');
+}
+
+/**
+ * Validate password strength
+ * Requirements:
+ * - At least 8 characters
+ * - At least one uppercase letter
+ * - At least one lowercase letter
+ * - At least one number
+ * - At least one special character
+ */
+export function validatePasswordStrength(password: string): {
+  isValid: boolean;
+  score: number;
+  errors: string[];
+  strength: 'weak' | 'fair' | 'good' | 'strong';
+} {
+  const errors: string[] = [];
+  let score = 0;
+  
+  // Length check
+  if (password.length >= 8) {
+    score += 1;
+  } else {
+    errors.push('At least 8 characters required');
+  }
+  
+  if (password.length >= 12) {
+    score += 1;
+  }
+  
+  // Uppercase check
+  if (/[A-Z]/.test(password)) {
+    score += 1;
+  } else {
+    errors.push('At least one uppercase letter required');
+  }
+  
+  // Lowercase check
+  if (/[a-z]/.test(password)) {
+    score += 1;
+  } else {
+    errors.push('At least one lowercase letter required');
+  }
+  
+  // Number check
+  if (/[0-9]/.test(password)) {
+    score += 1;
+  } else {
+    errors.push('At least one number required');
+  }
+  
+  // Special character check
+  if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+    score += 1;
+  } else {
+    errors.push('At least one special character required (!@#$%^&*...)');
+  }
+  
+  // Determine strength
+  let strength: 'weak' | 'fair' | 'good' | 'strong' = 'weak';
+  if (score >= 6) strength = 'strong';
+  else if (score >= 4) strength = 'good';
+  else if (score >= 3) strength = 'fair';
+  
+  return {
+    isValid: errors.length === 0,
+    score,
+    errors,
+    strength,
+  };
+}
+
+// ============================================================================
 // PHONE AUTHENTICATION (Uganda)
 // ============================================================================
 
@@ -228,9 +437,9 @@ export function getCurrentUser(): FirebaseUser | null {
 export function setupRecaptcha(containerId: string): RecaptchaVerifier {
   const { auth } = initializeFirebase();
   return new RecaptchaVerifier(auth, containerId, {
-    size: 'invisible',
+    size: "invisible",
     callback: () => {
-      console.log('reCAPTCHA solved');
+      console.log("reCAPTCHA solved");
     },
   });
 }
@@ -239,7 +448,10 @@ export function setupRecaptcha(containerId: string): RecaptchaVerifier {
  * Sign in with phone number (Uganda format)
  * Automatically formats Uganda phone numbers with +256 country code
  */
-export async function signInWithPhone(phoneNumber: string, recaptchaVerifier: RecaptchaVerifier) {
+export async function signInWithPhone(
+  phoneNumber: string,
+  recaptchaVerifier: RecaptchaVerifier,
+) {
   const { auth } = initializeFirebase();
   // Ensure phone number has Uganda country code
   const formattedPhone = formatUgandaPhone(phoneNumber);
@@ -251,15 +463,15 @@ export async function signInWithPhone(phoneNumber: string, recaptchaVerifier: Re
  */
 export function formatUgandaPhone(phone: string): string {
   // Remove all non-digit characters
-  const digits = phone.replace(/\D/g, '');
-  
+  const digits = phone.replace(/\D/g, "");
+
   // If already has country code
-  if (digits.startsWith('256')) {
+  if (digits.startsWith("256")) {
     return `+${digits}`;
   }
-  
+
   // Remove leading zero and add country code
-  const localNumber = digits.startsWith('0') ? digits.slice(1) : digits;
+  const localNumber = digits.startsWith("0") ? digits.slice(1) : digits;
   return `+256${localNumber}`;
 }
 
@@ -271,24 +483,27 @@ export function formatUgandaPhone(phone: string): string {
  * Collection names for EduPay Ledger
  */
 export const COLLECTIONS = {
-  SCHOOLS: 'schools',
-  STUDENTS: 'students',
-  PAYMENTS: 'payments',
-  USERS: 'users',
-  AUDIT_LOGS: 'audit_logs',
-  FEE_STRUCTURES: 'fee_structures',
-  INSTALLMENT_RULES: 'installment_rules',
-  TERMS: 'terms',
-  CLASSES: 'classes',
-  SMS_LOGS: 'sms_logs',
-  RECEIPTS: 'receipts',
-  SETTINGS: 'settings',
+  SCHOOLS: "schools",
+  STUDENTS: "students",
+  PAYMENTS: "payments",
+  USERS: "users",
+  AUDIT_LOGS: "audit_logs",
+  FEE_STRUCTURES: "fee_structures",
+  INSTALLMENT_RULES: "installment_rules",
+  TERMS: "terms",
+  CLASSES: "classes",
+  SMS_LOGS: "sms_logs",
+  RECEIPTS: "receipts",
+  SETTINGS: "settings",
 } as const;
 
 /**
  * Get a document reference
  */
-export function getDocRef(collectionName: string, docId: string): DocumentReference {
+export function getDocRef(
+  collectionName: string,
+  docId: string,
+): DocumentReference {
   const { db } = initializeFirebase();
   return doc(db, collectionName, docId);
 }
@@ -304,11 +519,14 @@ export function getCollectionRef(collectionName: string): CollectionReference {
 /**
  * Fetch a single document by ID
  */
-export async function fetchDocument<T>(collectionName: string, docId: string): Promise<T | null> {
+export async function fetchDocument<T>(
+  collectionName: string,
+  docId: string,
+): Promise<T | null> {
   const { db } = initializeFirebase();
   const docRef = doc(db, collectionName, docId);
   const docSnap = await getDoc(docRef);
-  
+
   if (docSnap.exists()) {
     return { id: docSnap.id, ...docSnap.data() } as T;
   }
@@ -321,18 +539,19 @@ export async function fetchDocument<T>(collectionName: string, docId: string): P
  */
 export async function fetchCollection<T>(
   collectionName: string,
-  queryConstraints: QueryConstraint[] = []
+  queryConstraints: QueryConstraint[] = [],
 ): Promise<T[]> {
   const { db } = initializeFirebase();
   const collectionRef = collection(db, collectionName);
-  const q = queryConstraints.length > 0 
-    ? query(collectionRef, ...queryConstraints) 
-    : query(collectionRef);
+  const q =
+    queryConstraints.length > 0
+      ? query(collectionRef, ...queryConstraints)
+      : query(collectionRef);
   const snapshot = await getDocs(q);
-  
-  return snapshot.docs.map(doc => ({
+
+  return snapshot.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data()
+    ...doc.data(),
   })) as T[];
 }
 
@@ -343,14 +562,18 @@ export async function saveDocument<T extends Record<string, any>>(
   collectionName: string,
   docId: string,
   data: T,
-  merge: boolean = true
+  merge: boolean = true,
 ): Promise<void> {
   const { db } = initializeFirebase();
   const docRef = doc(db, collectionName, docId);
-  await setDoc(docRef, {
-    ...data,
-    updatedAt: serverTimestamp(),
-  }, { merge });
+  await setDoc(
+    docRef,
+    {
+      ...data,
+      updatedAt: serverTimestamp(),
+    },
+    { merge },
+  );
 }
 
 /**
@@ -359,7 +582,7 @@ export async function saveDocument<T extends Record<string, any>>(
 export async function updateDocument(
   collectionName: string,
   docId: string,
-  data: Record<string, any>
+  data: Record<string, any>,
 ): Promise<void> {
   const { db } = initializeFirebase();
   const docRef = doc(db, collectionName, docId);
@@ -372,7 +595,10 @@ export async function updateDocument(
 /**
  * Delete a document
  */
-export async function removeDocument(collectionName: string, docId: string): Promise<void> {
+export async function removeDocument(
+  collectionName: string,
+  docId: string,
+): Promise<void> {
   const { db } = initializeFirebase();
   const docRef = doc(db, collectionName, docId);
   await deleteDoc(docRef);
@@ -383,30 +609,34 @@ export async function removeDocument(collectionName: string, docId: string): Pro
  */
 export async function batchWrite(
   operations: Array<{
-    type: 'set' | 'update' | 'delete';
+    type: "set" | "update" | "delete";
     collection: string;
     docId: string;
     data?: Record<string, any>;
-  }>
+  }>,
 ): Promise<void> {
   const { db } = initializeFirebase();
   const batch = writeBatch(db);
-  
-  operations.forEach(op => {
+
+  operations.forEach((op) => {
     const docRef = doc(db, op.collection, op.docId);
     switch (op.type) {
-      case 'set':
-        batch.set(docRef, { ...op.data, updatedAt: serverTimestamp() }, { merge: true });
+      case "set":
+        batch.set(
+          docRef,
+          { ...op.data, updatedAt: serverTimestamp() },
+          { merge: true },
+        );
         break;
-      case 'update':
+      case "update":
         batch.update(docRef, { ...op.data, updatedAt: serverTimestamp() });
         break;
-      case 'delete':
+      case "delete":
         batch.delete(docRef);
         break;
     }
   });
-  
+
   await batch.commit();
 }
 
@@ -414,7 +644,7 @@ export async function batchWrite(
  * Run a transaction
  */
 export async function runFirestoreTransaction<T>(
-  transactionFn: (transaction: any) => Promise<T>
+  transactionFn: (transaction: any) => Promise<T>,
 ): Promise<T> {
   const { db } = initializeFirebase();
   return runTransaction(db, transactionFn);
@@ -427,13 +657,13 @@ export function subscribeToDocument<T>(
   collectionName: string,
   docId: string,
   callback: (data: T | null) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ): () => void {
   const { db } = initializeFirebase();
   const docRef = doc(db, collectionName, docId);
-  
+
   return onSnapshot(
-    docRef, 
+    docRef,
     (docSnap) => {
       if (docSnap.exists()) {
         callback({ id: docSnap.id, ...docSnap.data() } as T);
@@ -443,8 +673,8 @@ export function subscribeToDocument<T>(
     },
     (error) => {
       if (onError) onError(error);
-      else console.error('Document subscription error:', error);
-    }
+      else console.error("Document subscription error:", error);
+    },
   );
 }
 
@@ -455,27 +685,28 @@ export function subscribeToCollection<T>(
   collectionName: string,
   queryConstraints: QueryConstraint[],
   callback: (data: T[]) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ): () => void {
   const { db } = initializeFirebase();
   const collectionRef = collection(db, collectionName);
-  const q = queryConstraints.length > 0 
-    ? query(collectionRef, ...queryConstraints) 
-    : query(collectionRef);
-  
+  const q =
+    queryConstraints.length > 0
+      ? query(collectionRef, ...queryConstraints)
+      : query(collectionRef);
+
   return onSnapshot(
-    q, 
+    q,
     (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
+      const data = snapshot.docs.map((doc) => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       })) as T[];
       callback(data);
     },
     (error) => {
       if (onError) onError(error);
-      else console.error('Collection subscription error:', error);
-    }
+      else console.error("Collection subscription error:", error);
+    },
   );
 }
 
@@ -489,7 +720,7 @@ export function subscribeToCollection<T>(
 export async function uploadFile(
   path: string,
   file: Blob | File,
-  metadata?: { contentType?: string; customMetadata?: Record<string, string> }
+  metadata?: { contentType?: string; customMetadata?: Record<string, string> },
 ): Promise<string> {
   const { storage } = initializeFirebase();
   const storageRef = ref(storage, path);
@@ -515,7 +746,7 @@ export async function getFileUrl(path: string): Promise<string> {
  */
 export async function callFunction<T = any, R = any>(
   functionName: string,
-  data?: T
+  data?: T,
 ): Promise<R> {
   const { functions } = initializeFirebase();
   const callable = httpsCallable<T, R>(functions, functionName);
@@ -540,22 +771,22 @@ export async function logAuditAction(
   collectionName: string,
   documentId: string,
   userId: string,
-  details?: Record<string, any>
+  details?: Record<string, any>,
 ): Promise<void> {
   const { db, auth } = initializeFirebase();
   const user = auth.currentUser;
-  
+
   const auditLog = {
     action,
     collection: collectionName,
     documentId,
     details: details || {},
-    userId: userId || user?.uid || 'system',
-    userEmail: user?.email || 'system',
+    userId: userId || user?.uid || "system",
+    userEmail: user?.email || "system",
     timestamp: serverTimestamp(),
-    ipAddress: typeof window !== 'undefined' ? 'client' : 'server',
+    ipAddress: typeof window !== "undefined" ? "client" : "server",
   };
-  
+
   const logsRef = collection(db, COLLECTIONS.AUDIT_LOGS);
   await setDoc(doc(logsRef), auditLog);
 }
@@ -586,4 +817,10 @@ export {
 };
 
 // Export types
-export type { FirebaseUser, UserCredential, DocumentReference, CollectionReference, QueryConstraint };
+export type {
+  FirebaseUser,
+  UserCredential,
+  DocumentReference,
+  CollectionReference,
+  QueryConstraint,
+};
