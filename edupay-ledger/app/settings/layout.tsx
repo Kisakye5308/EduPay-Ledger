@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { Sidebar, MobileNav } from '@/components/navigation/Sidebar';
-import { TopNav } from '@/components/navigation/TopNav';
+import React from "react";
+import { Sidebar, MobileNav } from "@/components/navigation/Sidebar";
+import { TopNav } from "@/components/navigation/TopNav";
 
 export default function SettingsLayout({
   children,
@@ -10,19 +10,23 @@ export default function SettingsLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark flex">
+    <div className="flex h-screen overflow-hidden">
       {/* Desktop Sidebar */}
-      <Sidebar />
-      
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen lg:ml-0">
-        <TopNav />
-        <main className="flex-1 pb-20 lg:pb-0">
-          {children}
-        </main>
+      <div className="hidden lg:block">
+        <Sidebar userName="Sarah Namuli" userRole="Head Bursar" />
       </div>
-      
-      {/* Mobile Navigation */}
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <TopNav
+          currentTerm="TERM 1"
+          currentYear={2024}
+          userName="Sarah Namuli"
+        />
+        <div className="flex-1 overflow-y-auto pb-20 lg:pb-0">{children}</div>
+      </main>
+
+      {/* Mobile Bottom Nav */}
       <MobileNav />
     </div>
   );
