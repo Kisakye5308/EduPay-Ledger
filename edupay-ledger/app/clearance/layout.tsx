@@ -1,14 +1,11 @@
-import type { Metadata } from 'next';
+"use client";
 
-export const metadata: Metadata = {
-  title: 'Exam Clearance | EduPay Ledger',
-  description: 'Manage student exam clearance status',
-};
+import { AuthenticatedLayout } from "@/components/layouts/AuthenticatedLayout";
 
 export default function ClearanceLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <AuthenticatedLayout>{children}</AuthenticatedLayout>;
 }

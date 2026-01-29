@@ -2,9 +2,10 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Avatar } from "../ui/Avatar";
+import { useFirebaseAuth } from "@/contexts/AuthContext";
 
 interface SidebarProps {
   schoolName?: string;
@@ -35,6 +36,17 @@ export function Sidebar({
   userAvatar,
 }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { logout } = useFirebaseAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   return (
     <aside className="w-64 bg-primary text-white flex flex-col justify-between shrink-0 h-screen sticky top-0">
@@ -46,7 +58,14 @@ export function Sidebar({
               account_balance_wallet
             </span>
           </div>
-          <h2 className="text-xl font-bold tracking-tight">EduPay Ledger</h2>
+          <div>
+            <h2 className="text-xl font-bold tracking-tight">EduPay Ledger</h2>
+            {schoolName && (
+              <p className="text-[10px] text-white/60 truncate max-w-[160px]">
+                {schoolName}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Navigation */}
@@ -82,20 +101,31 @@ export function Sidebar({
             size="md"
             className="ring-2 ring-white/20"
           />
-          <div>
-            <p className="text-xs font-semibold">{userName || "User"}</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold truncate">
+              {userName || "User"}
+            </p>
             <p className="text-[10px] text-white/50 uppercase tracking-wider">
               {userRole || "Staff"}
             </p>
           </div>
         </div>
-        <Link
-          href="/help"
-          className="flex items-center gap-2 text-white/50 hover:text-white transition-colors"
-        >
-          <span className="material-symbols-outlined text-sm">help</span>
-          <span className="text-xs font-medium">Help Center</span>
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            href="/help"
+            className="flex items-center gap-2 text-white/50 hover:text-white transition-colors"
+          >
+            <span className="material-symbols-outlined text-sm">help</span>
+            <span className="text-xs font-medium">Help</span>
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-white/50 hover:text-red-300 transition-colors"
+          >
+            <span className="material-symbols-outlined text-sm">logout</span>
+            <span className="text-xs font-medium">Logout</span>
+          </button>
+        </div>
       </div>
     </aside>
   );
