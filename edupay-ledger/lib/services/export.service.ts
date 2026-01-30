@@ -11,8 +11,8 @@ import { Student } from "@/types/student";
 /**
  * Converts data to CSV format
  */
-export function toCSV(
-  data: any[],
+export function toCSV<T extends Record<string, unknown>>(
+  data: T[],
   columns: Array<{ key: string; header: string }>,
 ): string {
   const headers = columns.map((col) => col.header).join(",");
