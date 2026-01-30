@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/components/ui/Toast";
+import { SkipLink } from "@/lib/accessibility";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -41,6 +42,7 @@ export default function RootLayout({
         />
       </head>
       <body className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased">
+        <SkipLink href="#main-content">Skip to main content</SkipLink>
         <AuthProvider>
           <ToastProvider>{children}</ToastProvider>
         </AuthProvider>
