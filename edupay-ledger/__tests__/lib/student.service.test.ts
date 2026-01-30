@@ -292,7 +292,7 @@ describe("Installment Progress", () => {
       installmentName: "2nd Installment",
       amountDue: 500000,
       amountPaid: 200000,
-      status: "partial",
+      status: "in_progress",
       deadline: new Date("2026-04-15") as any,
       isUnlocked: true,
     },
