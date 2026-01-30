@@ -88,17 +88,48 @@ export default function LoginPage() {
 
     try {
       console.log("Initiating Google sign-in...");
-      await signInWithGoogle?.();
+
+      if (!signInWithGoogle) {
+        // Fall back to demo mode if Google sign-in not available
+        console.log("Google sign-in not available, using demo mode...");
+        await loginAsDemo();
+        router.replace("/dashboard");
+        return;
+      }
+
+      await signInWithGoogle();
       console.log("Google sign-in completed, redirecting to dashboard...");
-      router.push("/dashboard");
-    } catch (err) {
+      // Use replace instead of push to prevent back navigation to login
+      router.replace("/dashboard");
+    } catch (err: any) {
       console.error("Google login error:", err);
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Google sign-in failed. Please try again.";
-      setError(errorMessage);
-    } finally {
+
+      // If popup was blocked or failed, offer demo mode
+      if (
+        err?.message?.includes("popup") ||
+        err?.message?.includes("blocked")
+      ) {
+        setError("Popup blocked. Click 'Try Demo' below to continue.");
+      } else {
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Google sign-in failed. Please try again.";
+        setError(errorMessage);
+      }
+      setIsLoading(false);
+    }
+  };
+
+  // Quick access to demo mode
+  const handleQuickDemo = async () => {
+    setIsLoading(true);
+    setError("");
+    try {
+      await loginAsDemo();
+      router.replace("/dashboard");
+    } catch (err) {
+      setError("Failed to start demo mode");
       setIsLoading(false);
     }
   };
@@ -167,8 +198,8 @@ export default function LoginPage() {
             variant="outline"
             fullWidth
             onClick={handleGoogleLogin}
-            disabled={isLoading}
-            className="mb-4 border-slate-300 hover:bg-slate-50"
+            disabled={isLoading || authLoading}
+            className="mb-2 border-slate-300 hover:bg-slate-50"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path
@@ -189,6 +220,23 @@ export default function LoginPage() {
               />
             </svg>
             Continue with Google
+          </Button>
+
+          {/* Quick Demo Access - Always visible */}
+          <Button
+            type="button"
+            variant="primary"
+            fullWidth
+            onClick={handleQuickDemo}
+            disabled={isLoading || authLoading}
+            className="mb-4"
+            icon={
+              <span className="material-symbols-outlined text-sm">
+                rocket_launch
+              </span>
+            }
+          >
+            Quick Demo Access
           </Button>
 
           {/* Divider */}
@@ -333,6 +381,13 @@ export default function LoginPage() {
                   </span>
                   {error || authError}
                 </p>
+                <button
+                  type="button"
+                  onClick={handleQuickDemo}
+                  className="mt-2 text-sm text-primary hover:underline"
+                >
+                  → Click here to use Demo Mode instead
+                </button>
               </div>
             )}
 
