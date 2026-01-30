@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { useFirebaseAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/Toast";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { success, error: showError } = useToast();
   const {
     user,
     isLoading: authLoading,
@@ -70,6 +72,7 @@ export default function LoginPage() {
       }
 
       await login(loginEmail, password);
+      success("Welcome back!", "Successfully logged in");
       router.push("/dashboard");
     } catch (err) {
       const errorMessage =
@@ -77,6 +80,7 @@ export default function LoginPage() {
           ? err.message
           : "Invalid credentials. Please try again.";
       setError(errorMessage);
+      showError("Login failed", errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -93,12 +97,14 @@ export default function LoginPage() {
         // Fall back to demo mode if Google sign-in not available
         console.log("Google sign-in not available, using demo mode...");
         await loginAsDemo();
+        success("Demo Mode", "Exploring with sample data");
         router.replace("/dashboard");
         return;
       }
 
       await signInWithGoogle();
       console.log("Google sign-in completed, redirecting to dashboard...");
+      success("Welcome!", "Signed in with Google");
       // Use replace instead of push to prevent back navigation to login
       router.replace("/dashboard");
     } catch (err: any) {
@@ -110,12 +116,14 @@ export default function LoginPage() {
         err?.message?.includes("blocked")
       ) {
         setError("Popup blocked. Click 'Try Demo' below to continue.");
+        showError("Popup Blocked", "Please allow popups or try demo mode");
       } else {
         const errorMessage =
           err instanceof Error
             ? err.message
             : "Google sign-in failed. Please try again.";
         setError(errorMessage);
+        showError("Sign-in Failed", errorMessage);
       }
       setIsLoading(false);
     }
@@ -127,9 +135,11 @@ export default function LoginPage() {
     setError("");
     try {
       await loginAsDemo();
+      success("Demo Mode", "Exploring with sample school data");
       router.replace("/dashboard");
     } catch (err) {
       setError("Failed to start demo mode");
+      showError("Demo Failed", "Could not start demo mode");
       setIsLoading(false);
     }
   };
@@ -140,9 +150,11 @@ export default function LoginPage() {
 
     try {
       await loginAsDemo();
+      success("Demo Mode", "Exploring with sample school data");
       router.push("/dashboard");
     } catch (err) {
       setError("Failed to start demo mode. Please try again.");
+      showError("Demo Failed", "Please try again");
     } finally {
       setIsLoading(false);
     }

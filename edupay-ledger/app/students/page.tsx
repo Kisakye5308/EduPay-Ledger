@@ -12,6 +12,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Input, Select } from "@/components/ui/Input";
 import { formatUGX } from "@/lib/utils";
 import { useFirebaseStudents } from "@/hooks/useFirebaseData";
+import { useToast } from "@/components/ui/Toast";
 import {
   exportStudentsToCSV,
   exportStudentsToPDF,
@@ -127,7 +128,7 @@ interface AddStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
   schoolId?: string;
-  onSuccess?: () => void;
+  onSuccess?: (studentName: string) => void;
 }
 
 function AddStudentModal({
@@ -183,7 +184,7 @@ function AddStudentModal({
 
       if (result.success) {
         onClose();
-        onSuccess?.();
+        onSuccess?.(`${formData.firstName} ${formData.lastName}`);
       } else {
         setSubmitError(result.error || "Failed to create student");
       }
@@ -382,6 +383,7 @@ function AddStudentModal({
 export default function StudentsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { success, error: showError } = useToast();
   const showAddModal = searchParams.get("action") === "add";
 
   const {
@@ -455,8 +457,16 @@ export default function StudentsPage() {
           );
           break;
       }
+      success(
+        "Export Complete",
+        `Students exported to ${format.toUpperCase()}`,
+      );
     } catch (error) {
       console.error("Export failed:", error);
+      showError(
+        "Export Failed",
+        "Could not export students. Please try again.",
+      );
     } finally {
       setShowExportModal(false);
     }
@@ -468,6 +478,11 @@ export default function StudentsPage() {
 
   const closeAddModal = () => {
     router.push("/students");
+  };
+
+  const handleStudentAdded = (studentName: string) => {
+    success("Student Added", `${studentName} has been enrolled successfully`);
+    refresh();
   };
 
   // Table columns
@@ -926,7 +941,11 @@ export default function StudentsPage() {
       </Card>
 
       {/* Add Student Modal */}
-      <AddStudentModal isOpen={showAddModal} onClose={closeAddModal} />
+      <AddStudentModal
+        isOpen={showAddModal}
+        onClose={closeAddModal}
+        onSuccess={handleStudentAdded}
+      />
 
       {/* Export Modal */}
       <Modal
