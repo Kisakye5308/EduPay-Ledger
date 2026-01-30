@@ -3,7 +3,7 @@
  * WCAG 2.1 compliant helpers for EduPay Ledger
  */
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 
 // ============================================================================
 // Focus Management
@@ -269,9 +269,6 @@ export function useAriaExpanded(initialState = false) {
 
   return { isExpanded, setIsExpanded, triggerProps, contentProps };
 }
-
-// Need to import useState for the hook above
-import { useState } from 'react';
 
 // ============================================================================
 // Color Contrast
