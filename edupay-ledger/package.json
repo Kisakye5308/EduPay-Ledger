@@ -28,6 +28,7 @@
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@hookform/resolvers": "^3.3.2",
+    "@sentry/nextjs": "^10.38.0",
     "@stellar/stellar-sdk": "^11.2.2",
     "@tailwindcss/forms": "^0.5.11",
     "clsx": "^2.0.0",
@@ -91,7 +92,10 @@
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64", "ia32"]
+          "arch": [
+            "x64",
+            "ia32"
+          ]
         }
       ],
       "icon": "public/icons/icon.ico",
@@ -105,13 +109,20 @@
       "shortcutName": "EduPay Ledger"
     },
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "icon": "public/icons/icon.icns",
       "category": "public.app-category.finance",
       "artifactName": "${productName}-${version}.${ext}"
     },
     "linux": {
-      "target": ["deb", "rpm", "AppImage"],
+      "target": [
+        "deb",
+        "rpm",
+        "AppImage"
+      ],
       "icon": "public/icons",
       "category": "Office",
       "artifactName": "${productName}-${version}.${ext}"

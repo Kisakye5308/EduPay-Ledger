@@ -2,11 +2,12 @@
  * Error Reporting Service
  *
  * Centralized error handling and reporting for EduPay Ledger.
- * In production, this integrates with Sentry or similar services.
+ * Integrates with Sentry for production error tracking.
  * In development, it provides detailed console logging.
  */
 
 import { ErrorInfo } from "react";
+import * as Sentry from "@sentry/nextjs";
 
 // ============================================================================
 // Types
@@ -222,7 +223,34 @@ export async function reportError(
     });
   }
 
-  // Queue the report
+  // Send to Sentry in production
+  if (config.environment === "production" || config.dsn) {
+    const sentryLevel =
+      severity === "fatal"
+        ? "fatal"
+        : severity === "error"
+          ? "error"
+          : severity === "warning"
+            ? "warning"
+            : "info";
+
+    Sentry.withScope((scope) => {
+      scope.setLevel(sentryLevel);
+      scope.setTag("error_id", report.id);
+
+      if (context.userId) scope.setUser({ id: context.userId });
+      if (context.schoolId) scope.setTag("school_id", context.schoolId);
+      if (context.page) scope.setTag("page", context.page);
+      if (context.action) scope.setTag("action", context.action);
+      if (context.additionalData) {
+        scope.setExtras(context.additionalData);
+      }
+
+      Sentry.captureException(error);
+    });
+  }
+
+  // Queue the report for local storage backup
   errorQueue.push(report);
 
   // Flush immediately for fatal/error, batch for others

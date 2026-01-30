@@ -84,27 +84,83 @@ import { getAnalytics, Analytics, isSupported } from "firebase/analytics";
 // ============================================================================
 
 /**
+ * Validates that required Firebase environment variables are set in production
+ */
+function validateFirebaseConfig(): void {
+  if (process.env.NODE_ENV === "production") {
+    const required = [
+      "NEXT_PUBLIC_FIREBASE_API_KEY",
+      "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN",
+      "NEXT_PUBLIC_FIREBASE_PROJECT_ID",
+      "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET",
+      "NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID",
+      "NEXT_PUBLIC_FIREBASE_APP_ID",
+    ];
+
+    const missing = required.filter((key) => !process.env[key]);
+
+    if (missing.length > 0) {
+      console.error(
+        `Missing required Firebase environment variables: ${missing.join(", ")}\n` +
+          "Please configure these in your .env.local file or deployment environment.",
+      );
+    }
+  }
+}
+
+// Run validation on import
+validateFirebaseConfig();
+
+/**
  * Firebase project configuration for EduPay Ledger
- * These values connect to the edu-pay-ledger Firebase project
+ *
+ * IMPORTANT: In production, all values MUST come from environment variables.
+ * The fallback values below are for development/demo purposes only.
+ *
+ * To configure for production:
+ * 1. Create a .env.local file with your Firebase project credentials
+ * 2. Or set environment variables in your deployment platform
+ *
+ * Required variables:
+ * - NEXT_PUBLIC_FIREBASE_API_KEY
+ * - NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+ * - NEXT_PUBLIC_FIREBASE_PROJECT_ID
+ * - NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+ * - NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+ * - NEXT_PUBLIC_FIREBASE_APP_ID
+ * - NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID (optional, for analytics)
  */
 const firebaseConfig = {
+  // Development fallbacks - DO NOT use in production
   apiKey:
     process.env.NEXT_PUBLIC_FIREBASE_API_KEY ||
-    "AIzaSyD_rkeL7gDD-4uWXR6CGnwEyW42t20qyHg",
+    (process.env.NODE_ENV !== "production"
+      ? "AIzaSyD_rkeL7gDD-4uWXR6CGnwEyW42t20qyHg"
+      : ""),
   authDomain:
     process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ||
-    "edu-pay-ledger.firebaseapp.com",
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "edu-pay-ledger",
+    (process.env.NODE_ENV !== "production"
+      ? "edu-pay-ledger.firebaseapp.com"
+      : ""),
+  projectId:
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ||
+    (process.env.NODE_ENV !== "production" ? "edu-pay-ledger" : ""),
   storageBucket:
     process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ||
-    "edu-pay-ledger.firebasestorage.app",
+    (process.env.NODE_ENV !== "production"
+      ? "edu-pay-ledger.firebasestorage.app"
+      : ""),
   messagingSenderId:
-    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "725803373518",
+    process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ||
+    (process.env.NODE_ENV !== "production" ? "725803373518" : ""),
   appId:
     process.env.NEXT_PUBLIC_FIREBASE_APP_ID ||
-    "1:725803373518:web:88eceae685240408e6519f",
+    (process.env.NODE_ENV !== "production"
+      ? "1:725803373518:web:88eceae685240408e6519f"
+      : ""),
   measurementId:
-    process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || "G-KN0JN93B48",
+    process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ||
+    (process.env.NODE_ENV !== "production" ? "G-KN0JN93B48" : ""),
 };
 
 // ============================================================================
