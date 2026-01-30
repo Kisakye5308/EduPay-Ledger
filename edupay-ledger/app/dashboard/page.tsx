@@ -16,6 +16,11 @@ import type {
   ActivityItem,
   InstallmentStat,
 } from "@/lib/services/dashboard.service";
+import {
+  exportDashboardToCSV,
+  exportDashboardToPDF,
+  exportDashboardToExcel,
+} from "@/lib/services/export.service";
 
 // ============================================================================
 // SUB-COMPONENTS
@@ -374,10 +379,34 @@ export default function DashboardPage() {
     setSelectedCell({ classId, stream });
   };
 
-  const handleExport = (format: "pdf" | "csv" | "excel") => {
-    // TODO: Implement export functionality
-    console.log(`Exporting as ${format}`);
-    setShowExportModal(false);
+  const handleExport = async (format: "pdf" | "csv" | "excel") => {
+    try {
+      const exportData = {
+        schoolName: user?.schoolName || "EduPay School",
+        term: data?.currentTerm || "Term 1",
+        year: data?.academicYear || "2026",
+        stats: data?.stats,
+        heatmap: data?.heatmap || [],
+        activities: data?.activities || [],
+        timestamp: new Date().toISOString(),
+      };
+
+      switch (format) {
+        case "csv":
+          exportDashboardToCSV(exportData);
+          break;
+        case "pdf":
+          exportDashboardToPDF(exportData);
+          break;
+        case "excel":
+          exportDashboardToExcel(exportData);
+          break;
+      }
+    } catch (error) {
+      console.error("Export failed:", error);
+    } finally {
+      setShowExportModal(false);
+    }
   };
 
   if (isLoading) {

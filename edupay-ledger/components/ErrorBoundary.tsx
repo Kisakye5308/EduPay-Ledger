@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 /**
  * Error Boundary Component
@@ -6,7 +6,8 @@
  * and displays a fallback UI instead of crashing
  */
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from "react";
+import { reportErrorBoundary } from "@/lib/services/error-reporting.service";
 
 interface Props {
   children: ReactNode;
@@ -38,15 +39,18 @@ export class ErrorBoundary extends Component<Props, State> {
     this.setState({ errorInfo });
 
     // Log error to console in development
-    if (process.env.NODE_ENV === 'development') {
-      console.error('ErrorBoundary caught an error:', error, errorInfo);
+    if (process.env.NODE_ENV === "development") {
+      console.error("ErrorBoundary caught an error:", error, errorInfo);
     }
 
     // Call optional error handler
     this.props.onError?.(error, errorInfo);
 
-    // TODO: Send to error reporting service (e.g., Sentry)
-    // logErrorToService(error, errorInfo);
+    // Send to error reporting service
+    reportErrorBoundary(error, errorInfo, {
+      page:
+        typeof window !== "undefined" ? window.location.pathname : undefined,
+    });
   }
 
   handleReset = () => {
@@ -89,7 +93,7 @@ export function DefaultErrorFallback({
   errorInfo,
   onReset,
 }: ErrorFallbackProps) {
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = process.env.NODE_ENV === "development";
 
   return (
     <div className="min-h-[400px] flex items-center justify-center p-6">
@@ -173,7 +177,7 @@ export function DefaultErrorFallback({
 
         {/* Support Link */}
         <p className="mt-6 text-sm text-gray-500">
-          Need help?{' '}
+          Need help?{" "}
           <a href="/support" className="text-primary-600 hover:underline">
             Contact Support
           </a>
@@ -191,8 +195,8 @@ interface PageErrorFallbackProps {
 }
 
 export function PageErrorFallback({
-  title = 'Page Error',
-  message = 'This page failed to load. Please try refreshing.',
+  title = "Page Error",
+  message = "This page failed to load. Please try refreshing.",
   onRetry,
 }: PageErrorFallbackProps) {
   return (
@@ -205,7 +209,13 @@ export function PageErrorFallback({
             fill="none"
             className="w-full h-full text-error-400"
           >
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            />
             <path
               d="M8 8l8 8M16 8l-8 8"
               stroke="currentColor"
@@ -293,7 +303,7 @@ interface DataErrorFallbackProps {
 }
 
 export function DataErrorFallback({
-  message = 'Failed to load data',
+  message = "Failed to load data",
   onRetry,
 }: DataErrorFallbackProps) {
   return (

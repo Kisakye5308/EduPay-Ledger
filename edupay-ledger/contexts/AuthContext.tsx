@@ -28,6 +28,11 @@ import {
   sendVerificationEmail,
 } from "@/lib/firebase";
 import type { User as FirebaseUser } from "firebase/auth";
+import {
+  authRateLimiter,
+  RateLimitError,
+  formatRateLimitTime,
+} from "@/lib/services/rate-limiter.service";
 
 // ============================================================================
 // TYPES
@@ -177,12 +182,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, [isDemoMode]);
 
-  // Login
+  // Login with rate limiting
   const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
       setError(null);
+
+      // Check rate limit before attempting login
+      const rateLimitStatus = authRateLimiter.isRateLimited(
+        email.toLowerCase(),
+      );
+      if (rateLimitStatus.limited) {
+        const message = `Too many failed login attempts. Please try again in ${formatRateLimitTime(rateLimitStatus.retryAfter || 0)}.`;
+        setError(message);
+        throw new RateLimitError(message, rateLimitStatus.retryAfter);
+      }
+
       await signInWithEmail(email, password);
+
+      // Success - clear rate limit
+      authRateLimiter.recordSuccess(email.toLowerCase());
 
       // Update last login timestamp
       const currentUser = getCurrentUser();
@@ -192,7 +211,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         });
       }
     } catch (err: any) {
-      const errorMessage = getAuthErrorMessage(err.code);
+      // If it's already a rate limit error, re-throw
+      if (err instanceof RateLimitError) {
+        throw err;
+      }
+
+      // Record failed attempt
+      const result = authRateLimiter.recordFailedAttempt(email.toLowerCase());
+
+      let errorMessage = getAuthErrorMessage(err.code);
+
+      // Add rate limit warning to error message
+      if (result.locked) {
+        errorMessage = `${errorMessage} Account locked for ${formatRateLimitTime(result.lockoutSeconds || 0)} due to too many failed attempts.`;
+      } else if (
+        result.attemptsRemaining > 0 &&
+        result.attemptsRemaining <= 3
+      ) {
+        errorMessage = `${errorMessage} ${result.attemptsRemaining} attempt${result.attemptsRemaining !== 1 ? "s" : ""} remaining before lockout.`;
+      }
+
       setError(errorMessage);
       throw new Error(errorMessage);
     } finally {

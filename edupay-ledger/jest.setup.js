@@ -3,6 +3,11 @@
  * Runs before each test file
  */
 
+// Polyfill TextEncoder/TextDecoder for Node.js environment
+import { TextEncoder, TextDecoder } from "util";
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder;
+
 // Import Jest DOM matchers
 import "@testing-library/jest-dom";
 
@@ -36,6 +41,13 @@ jest.mock("firebase/auth", () => ({
     callback(null);
     return jest.fn();
   }),
+  GoogleAuthProvider: jest.fn().mockImplementation(() => ({
+    addScope: jest.fn(),
+    setCustomParameters: jest.fn(),
+  })),
+  signInWithPopup: jest.fn(),
+  setPersistence: jest.fn(() => Promise.resolve()),
+  browserLocalPersistence: {},
 }));
 
 jest.mock("firebase/firestore", () => ({
@@ -58,6 +70,28 @@ jest.mock("firebase/firestore", () => ({
   },
   enableIndexedDbPersistence: jest.fn(),
   onSnapshot: jest.fn(),
+}));
+
+// Mock Firebase Functions
+jest.mock("firebase/functions", () => ({
+  getFunctions: jest.fn(() => ({})),
+  httpsCallable: jest.fn(() => jest.fn(() => Promise.resolve({ data: {} }))),
+  connectFunctionsEmulator: jest.fn(),
+}));
+
+// Mock Firebase Storage
+jest.mock("firebase/storage", () => ({
+  getStorage: jest.fn(() => ({})),
+  ref: jest.fn(),
+  uploadBytes: jest.fn(),
+  getDownloadURL: jest.fn(() => Promise.resolve("https://example.com/file")),
+}));
+
+// Mock Firebase Analytics
+jest.mock("firebase/analytics", () => ({
+  getAnalytics: jest.fn(() => ({})),
+  logEvent: jest.fn(),
+  isSupported: jest.fn(() => Promise.resolve(false)),
 }));
 
 // Mock window.matchMedia

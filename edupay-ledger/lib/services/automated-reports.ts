@@ -3,28 +3,53 @@
  * Scheduled report generation and delivery
  */
 
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, subWeeks, subMonths } from 'date-fns';
-import { collection, addDoc, getDocs, query, where, updateDoc, doc, Timestamp } from 'firebase/firestore';
-import { db } from '../firebase';
-import { formatCurrency } from '../utils';
+import {
+  format,
+  startOfDay,
+  endOfDay,
+  startOfWeek,
+  endOfWeek,
+  startOfMonth,
+  endOfMonth,
+  subDays,
+  subWeeks,
+  subMonths,
+} from "date-fns";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  updateDoc,
+  doc,
+  Timestamp,
+} from "firebase/firestore";
+import { db } from "../firebase";
+import { formatCurrency } from "../utils";
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type ReportType = 
-  | 'daily_collection'
-  | 'weekly_summary'
-  | 'monthly_summary'
-  | 'arrears_list'
-  | 'class_breakdown'
-  | 'payment_methods'
-  | 'term_progress'
-  | 'custom';
+export type ReportType =
+  | "daily_collection"
+  | "weekly_summary"
+  | "monthly_summary"
+  | "arrears_list"
+  | "class_breakdown"
+  | "payment_methods"
+  | "term_progress"
+  | "custom";
 
-export type ReportFormat = 'pdf' | 'excel' | 'csv' | 'email';
+export type ReportFormat = "pdf" | "excel" | "csv" | "email";
 
-export type ScheduleFrequency = 'daily' | 'weekly' | 'monthly' | 'termly' | 'on_demand';
+export type ScheduleFrequency =
+  | "daily"
+  | "weekly"
+  | "monthly"
+  | "termly"
+  | "on_demand";
 
 export interface ReportSchedule {
   id: string;
@@ -63,8 +88,27 @@ export interface GeneratedReport {
   generatedBy: string;
   format: ReportFormat;
   fileUrl?: string;
-  data: any;
+  data: ReportData;
   summary: ReportSummary;
+}
+
+export interface ReportPayment {
+  id: string;
+  studentId: string;
+  amount: number;
+  channel?: string;
+  date?: Date;
+  [key: string]: unknown;
+}
+
+export interface ReportData {
+  payments: ReportPayment[];
+  totals?: {
+    expected?: number;
+    arrears?: number;
+    [key: string]: number | undefined;
+  };
+  [key: string]: unknown;
 }
 
 export interface ReportSummary {
@@ -81,50 +125,53 @@ export interface ReportSummary {
 // Report Templates
 // ============================================================================
 
-export const reportTemplates: Record<ReportType, {
-  title: string;
-  description: string;
-  defaultFrequency: ScheduleFrequency;
-}> = {
+export const reportTemplates: Record<
+  ReportType,
+  {
+    title: string;
+    description: string;
+    defaultFrequency: ScheduleFrequency;
+  }
+> = {
   daily_collection: {
-    title: 'Daily Collection Report',
-    description: 'Summary of all payments received in a day',
-    defaultFrequency: 'daily',
+    title: "Daily Collection Report",
+    description: "Summary of all payments received in a day",
+    defaultFrequency: "daily",
   },
   weekly_summary: {
-    title: 'Weekly Summary Report',
-    description: 'Week-over-week collection performance',
-    defaultFrequency: 'weekly',
+    title: "Weekly Summary Report",
+    description: "Week-over-week collection performance",
+    defaultFrequency: "weekly",
   },
   monthly_summary: {
-    title: 'Monthly Summary Report',
-    description: 'Comprehensive monthly financial overview',
-    defaultFrequency: 'monthly',
+    title: "Monthly Summary Report",
+    description: "Comprehensive monthly financial overview",
+    defaultFrequency: "monthly",
   },
   arrears_list: {
-    title: 'Arrears Report',
-    description: 'List of students with outstanding balances',
-    defaultFrequency: 'weekly',
+    title: "Arrears Report",
+    description: "List of students with outstanding balances",
+    defaultFrequency: "weekly",
   },
   class_breakdown: {
-    title: 'Class-wise Collection Report',
-    description: 'Collection performance by class',
-    defaultFrequency: 'monthly',
+    title: "Class-wise Collection Report",
+    description: "Collection performance by class",
+    defaultFrequency: "monthly",
   },
   payment_methods: {
-    title: 'Payment Methods Analysis',
-    description: 'Breakdown of collections by payment method',
-    defaultFrequency: 'monthly',
+    title: "Payment Methods Analysis",
+    description: "Breakdown of collections by payment method",
+    defaultFrequency: "monthly",
   },
   term_progress: {
-    title: 'Term Progress Report',
-    description: 'Overall term fee collection progress',
-    defaultFrequency: 'weekly',
+    title: "Term Progress Report",
+    description: "Overall term fee collection progress",
+    defaultFrequency: "weekly",
   },
   custom: {
-    title: 'Custom Report',
-    description: 'User-defined report with custom filters',
-    defaultFrequency: 'on_demand',
+    title: "Custom Report",
+    description: "User-defined report with custom filters",
+    defaultFrequency: "on_demand",
   },
 };
 
@@ -138,16 +185,16 @@ export const reportTemplates: Record<ReportType, {
 export async function generateReport(
   reportType: ReportType,
   filters: ReportFilters,
-  generatedBy: string
+  generatedBy: string,
 ): Promise<GeneratedReport> {
   const period = getReportPeriod(reportType, filters);
-  
+
   // Fetch data based on report type
   const data = await fetchReportData(reportType, period, filters);
-  
+
   // Calculate summary
   const summary = calculateReportSummary(data);
-  
+
   // Generate highlights
   summary.highlights = generateHighlights(reportType, data, summary);
 
@@ -158,7 +205,7 @@ export async function generateReport(
     period,
     generatedAt: new Date(),
     generatedBy,
-    format: 'email', // Default format
+    format: "email", // Default format
     data,
     summary,
   };
@@ -174,7 +221,7 @@ export async function generateReport(
  */
 function getReportPeriod(
   reportType: ReportType,
-  filters: ReportFilters
+  filters: ReportFilters,
 ): { start: Date; end: Date } {
   if (filters.startDate && filters.endDate) {
     return { start: filters.startDate, end: filters.endDate };
@@ -183,19 +230,19 @@ function getReportPeriod(
   const now = new Date();
 
   switch (reportType) {
-    case 'daily_collection':
+    case "daily_collection":
       return {
         start: startOfDay(subDays(now, 1)),
         end: endOfDay(subDays(now, 1)),
       };
-    case 'weekly_summary':
+    case "weekly_summary":
       return {
         start: startOfWeek(subWeeks(now, 1)),
         end: endOfWeek(subWeeks(now, 1)),
       };
-    case 'monthly_summary':
-    case 'class_breakdown':
-    case 'payment_methods':
+    case "monthly_summary":
+    case "class_breakdown":
+    case "payment_methods":
       return {
         start: startOfMonth(subMonths(now, 1)),
         end: endOfMonth(subMonths(now, 1)),
@@ -215,7 +262,7 @@ function getReportPeriod(
 async function fetchReportData(
   reportType: ReportType,
   period: { start: Date; end: Date },
-  filters: ReportFilters
+  filters: ReportFilters,
 ): Promise<any> {
   // Placeholder data structure
   // In production, this would query Firestore based on filters
@@ -234,19 +281,24 @@ async function fetchReportData(
 /**
  * Calculate summary statistics from report data
  */
-function calculateReportSummary(data: any): ReportSummary {
+function calculateReportSummary(data: ReportData): ReportSummary {
   const payments = data.payments || [];
-  
-  const totalCollected = payments.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+
+  const totalCollected = payments.reduce(
+    (sum: number, p: ReportPayment) => sum + (p.amount || 0),
+    0,
+  );
   const totalExpected = data.totals?.expected || 0;
-  const collectionRate = totalExpected > 0 ? (totalCollected / totalExpected) * 100 : 0;
+  const collectionRate =
+    totalExpected > 0 ? (totalCollected / totalExpected) * 100 : 0;
 
   return {
     totalCollected,
     totalExpected,
     collectionRate,
     transactionCount: payments.length,
-    studentsCount: new Set(payments.map((p: any) => p.studentId)).size,
+    studentsCount: new Set(payments.map((p: ReportPayment) => p.studentId))
+      .size,
     arrearsTotal: data.totals?.arrears || 0,
     highlights: [],
   };
@@ -257,18 +309,24 @@ function calculateReportSummary(data: any): ReportSummary {
  */
 function generateHighlights(
   reportType: ReportType,
-  data: any,
-  summary: ReportSummary
+  data: ReportData,
+  summary: ReportSummary,
 ): string[] {
   const highlights: string[] = [];
 
   // Collection rate insight
   if (summary.collectionRate >= 90) {
-    highlights.push(`Excellent collection rate of ${summary.collectionRate.toFixed(1)}%`);
+    highlights.push(
+      `Excellent collection rate of ${summary.collectionRate.toFixed(1)}%`,
+    );
   } else if (summary.collectionRate >= 70) {
-    highlights.push(`Good collection rate of ${summary.collectionRate.toFixed(1)}%`);
+    highlights.push(
+      `Good collection rate of ${summary.collectionRate.toFixed(1)}%`,
+    );
   } else if (summary.collectionRate < 50) {
-    highlights.push(`⚠️ Low collection rate of ${summary.collectionRate.toFixed(1)}% needs attention`);
+    highlights.push(
+      `⚠️ Low collection rate of ${summary.collectionRate.toFixed(1)}% needs attention`,
+    );
   }
 
   // Transaction volume
@@ -290,7 +348,7 @@ function generateHighlights(
  */
 async function saveReport(report: GeneratedReport): Promise<string> {
   try {
-    const docRef = await addDoc(collection(db, 'reports'), {
+    const docRef = await addDoc(collection(db, "reports"), {
       ...report,
       generatedAt: Timestamp.fromDate(report.generatedAt),
       period: {
@@ -300,7 +358,7 @@ async function saveReport(report: GeneratedReport): Promise<string> {
     });
     return docRef.id;
   } catch (error) {
-    console.error('Error saving report:', error);
+    console.error("Error saving report:", error);
     throw error;
   }
 }
@@ -313,11 +371,11 @@ async function saveReport(report: GeneratedReport): Promise<string> {
  * Create a new report schedule
  */
 export async function createReportSchedule(
-  schedule: Omit<ReportSchedule, 'id' | 'createdAt' | 'updatedAt' | 'nextRun'>
+  schedule: Omit<ReportSchedule, "id" | "createdAt" | "updatedAt" | "nextRun">,
 ): Promise<string> {
   const nextRun = calculateNextRun(schedule.frequency);
-  
-  const docRef = await addDoc(collection(db, 'reportSchedules'), {
+
+  const docRef = await addDoc(collection(db, "reportSchedules"), {
     ...schedule,
     nextRun: Timestamp.fromDate(nextRun),
     createdAt: Timestamp.now(),
@@ -332,9 +390,9 @@ export async function createReportSchedule(
  */
 export async function updateReportSchedule(
   scheduleId: string,
-  updates: Partial<ReportSchedule>
+  updates: Partial<ReportSchedule>,
 ): Promise<void> {
-  const scheduleRef = doc(db, 'reportSchedules', scheduleId);
+  const scheduleRef = doc(db, "reportSchedules", scheduleId);
   await updateDoc(scheduleRef, {
     ...updates,
     updatedAt: Timestamp.now(),
@@ -346,34 +404,36 @@ export async function updateReportSchedule(
  */
 function calculateNextRun(frequency: ScheduleFrequency): Date {
   const now = new Date();
-  
+
   switch (frequency) {
-    case 'daily':
+    case "daily":
       // Next day at 6 AM
       const nextDay = new Date(now);
       nextDay.setDate(nextDay.getDate() + 1);
       nextDay.setHours(6, 0, 0, 0);
       return nextDay;
-      
-    case 'weekly':
+
+    case "weekly":
       // Next Monday at 6 AM
       const nextMonday = new Date(now);
-      nextMonday.setDate(nextMonday.getDate() + ((7 - nextMonday.getDay() + 1) % 7 || 7));
+      nextMonday.setDate(
+        nextMonday.getDate() + ((7 - nextMonday.getDay() + 1) % 7 || 7),
+      );
       nextMonday.setHours(6, 0, 0, 0);
       return nextMonday;
-      
-    case 'monthly':
+
+    case "monthly":
       // First day of next month at 6 AM
       const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
       nextMonth.setHours(6, 0, 0, 0);
       return nextMonth;
-      
-    case 'termly':
+
+    case "termly":
       // This would need term configuration
       const nextTerm = new Date(now);
       nextTerm.setMonth(nextTerm.getMonth() + 4);
       return nextTerm;
-      
+
     default:
       return now;
   }
@@ -384,15 +444,15 @@ function calculateNextRun(frequency: ScheduleFrequency): Date {
  */
 export async function getDueSchedules(): Promise<ReportSchedule[]> {
   const now = new Date();
-  
+
   const schedulesQuery = query(
-    collection(db, 'reportSchedules'),
-    where('isActive', '==', true),
-    where('nextRun', '<=', Timestamp.fromDate(now))
+    collection(db, "reportSchedules"),
+    where("isActive", "==", true),
+    where("nextRun", "<=", Timestamp.fromDate(now)),
   );
-  
+
   const snapshot = await getDocs(schedulesQuery);
-  return snapshot.docs.map(doc => ({
+  return snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
     nextRun: doc.data().nextRun?.toDate(),
@@ -405,13 +465,15 @@ export async function getDueSchedules(): Promise<ReportSchedule[]> {
 /**
  * Execute a scheduled report
  */
-export async function executeScheduledReport(schedule: ReportSchedule): Promise<void> {
+export async function executeScheduledReport(
+  schedule: ReportSchedule,
+): Promise<void> {
   try {
     // Generate the report
     const report = await generateReport(
       schedule.reportType,
       schedule.filters || {},
-      'system'
+      "system",
     );
 
     // Send to recipients
@@ -441,13 +503,16 @@ export async function executeScheduledReport(schedule: ReportSchedule): Promise<
  * Send report via email
  * This is a placeholder - actual implementation would use an email service
  */
-async function sendReportEmail(recipient: string, report: GeneratedReport): Promise<void> {
+async function sendReportEmail(
+  recipient: string,
+  report: GeneratedReport,
+): Promise<void> {
   const emailContent = formatReportEmail(report);
-  
+
   // In production, this would send via Firebase Extensions (Trigger Email)
   // or a service like SendGrid/Mailgun
   console.log(`Would send report to ${recipient}:`, emailContent.subject);
-  
+
   // Example: Using Firebase Trigger Email extension
   // await addDoc(collection(db, 'mail'), {
   //   to: recipient,
@@ -458,11 +523,15 @@ async function sendReportEmail(recipient: string, report: GeneratedReport): Prom
 /**
  * Format report as email content
  */
-function formatReportEmail(report: GeneratedReport): { subject: string; html: string; text: string } {
-  const periodStr = `${format(report.period.start, 'dd MMM yyyy')} - ${format(report.period.end, 'dd MMM yyyy')}`;
-  
+function formatReportEmail(report: GeneratedReport): {
+  subject: string;
+  html: string;
+  text: string;
+} {
+  const periodStr = `${format(report.period.start, "dd MMM yyyy")} - ${format(report.period.end, "dd MMM yyyy")}`;
+
   const subject = `${report.title} - ${periodStr}`;
-  
+
   const html = `
     <!DOCTYPE html>
     <html>
@@ -502,7 +571,7 @@ function formatReportEmail(report: GeneratedReport): { subject: string; html: st
         </div>
         
         <h3>Key Insights</h3>
-        ${report.summary.highlights.map(h => `<div class="highlight">${h}</div>`).join('')}
+        ${report.summary.highlights.map((h) => `<div class="highlight">${h}</div>`).join("")}
         
         <p style="margin-top:20px">
           <a href="${process.env.NEXT_PUBLIC_APP_URL}/reports/${report.id}" 
@@ -514,7 +583,7 @@ function formatReportEmail(report: GeneratedReport): { subject: string; html: st
       
       <div class="footer">
         <p>This report was automatically generated by EduPay Ledger.</p>
-        <p>Generated on ${format(report.generatedAt, 'dd MMM yyyy HH:mm')}</p>
+        <p>Generated on ${format(report.generatedAt, "dd MMM yyyy HH:mm")}</p>
       </div>
     </body>
     </html>
@@ -532,12 +601,12 @@ Transactions: ${report.summary.transactionCount}
 
 KEY INSIGHTS
 ------------
-${report.summary.highlights.join('\n')}
+${report.summary.highlights.join("\n")}
 
 View full report: ${process.env.NEXT_PUBLIC_APP_URL}/reports/${report.id}
 
 ---
-Generated by EduPay Ledger on ${format(report.generatedAt, 'dd MMM yyyy HH:mm')}
+Generated by EduPay Ledger on ${format(report.generatedAt, "dd MMM yyyy HH:mm")}
   `;
 
   return { subject, html, text };
@@ -552,40 +621,54 @@ Generated by EduPay Ledger on ${format(report.generatedAt, 'dd MMM yyyy HH:mm')}
  */
 export function exportReportAsCSV(report: GeneratedReport): string {
   // Header row
-  const headers = ['Date', 'Student', 'Class', 'Amount', 'Method', 'Reference'];
-  const rows = [headers.join(',')];
+  const headers = ["Date", "Student", "Class", "Amount", "Method", "Reference"];
+  const rows = [headers.join(",")];
 
   // Data rows
   const payments = report.data.payments || [];
   for (const payment of payments) {
     const row = [
-      format(payment.date, 'yyyy-MM-dd'),
-      `"${payment.studentName || ''}"`,
-      payment.className || '',
+      format(payment.date, "yyyy-MM-dd"),
+      `"${payment.studentName || ""}"`,
+      payment.className || "",
       payment.amount || 0,
-      payment.method || '',
-      payment.reference || '',
+      payment.method || "",
+      payment.reference || "",
     ];
-    rows.push(row.join(','));
+    rows.push(row.join(","));
   }
 
   // Summary row
-  rows.push('');
+  rows.push("");
   rows.push(`Total,,,${report.summary.totalCollected},,`);
   rows.push(`Collection Rate,,,${report.summary.collectionRate.toFixed(1)}%,,`);
 
-  return rows.join('\n');
+  return rows.join("\n");
 }
 
 /**
  * Generate report data for Excel export
  * Returns data structure suitable for a library like xlsx
  */
-export function prepareReportForExcel(report: GeneratedReport): any {
+export interface ExcelReportData {
+  summary: {
+    title: string;
+    period: string;
+    totalCollected: number;
+    collectionRate: number;
+    transactions: number;
+  };
+  payments: ReportPayment[];
+  highlights: string[];
+}
+
+export function prepareReportForExcel(
+  report: GeneratedReport,
+): ExcelReportData {
   return {
     summary: {
       title: report.title,
-      period: `${format(report.period.start, 'dd/MM/yyyy')} - ${format(report.period.end, 'dd/MM/yyyy')}`,
+      period: `${format(report.period.start, "dd/MM/yyyy")} - ${format(report.period.end, "dd/MM/yyyy")}`,
       totalCollected: report.summary.totalCollected,
       collectionRate: report.summary.collectionRate,
       transactions: report.summary.transactionCount,

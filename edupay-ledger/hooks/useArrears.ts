@@ -5,10 +5,22 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { getStudentsWithArrears } from '@/lib/services/student.service';
-import type { Student } from '@/types/student';
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  getStudentsWithArrears,
+  getStudentById,
+} from "@/lib/services/student.service";
+import {
+  sendDeadlineReminderSMS,
+  type DeadlineReminderData,
+} from "@/lib/services/notification.service";
+import {
+  getAllMockStudents,
+  getMockGlobalStats,
+  type MockStudent,
+} from "@/lib/services/mockDataStore";
+import type { Student } from "@/types/student";
 
 // ============================================================================
 // TYPES
@@ -73,8 +85,10 @@ interface UseArrearsReturn {
   error: string | null;
   refresh: () => void;
   availableClasses: string[];
-  sendReminder: (studentId: string) => Promise<void>;
-  sendBulkReminders: (studentIds: string[]) => Promise<void>;
+  sendReminder: (studentId: string) => Promise<boolean>;
+  sendBulkReminders: (
+    studentIds: string[],
+  ) => Promise<{ sent: number; failed: number }>;
 }
 
 // ============================================================================
@@ -352,17 +366,78 @@ export function useArrears(options: UseArrearsOptions = {}): UseArrearsReturn {
     setCurrentPage(1);
   }, []);
 
-  const sendReminder = useCallback(async (studentId: string) => {
-    // TODO: Implement SMS reminder via notification service
-    console.log(`Sending reminder to student: ${studentId}`);
-    // Would call: await sendPaymentReminderSMS(studentId);
-  }, []);
+  const sendReminder = useCallback(
+    async (studentId: string): Promise<boolean> => {
+      try {
+        // Find the student in our list
+        const student = allStudents.find((s) => s.id === studentId);
+        if (!student) {
+          console.error(`Student not found: ${studentId}`);
+          return false;
+        }
 
-  const sendBulkReminders = useCallback(async (studentIds: string[]) => {
-    // TODO: Implement bulk SMS reminders
-    console.log(`Sending bulk reminders to: ${studentIds.join(', ')}`);
-    // Would call: await Promise.all(studentIds.map(id => sendPaymentReminderSMS(id)));
-  }, []);
+        // Prepare reminder data
+        const reminderData: DeadlineReminderData = {
+          phoneNumber: student.guardianPhone,
+          studentName: student.name,
+          installmentName: "School Fees",
+          amountDue: student.balance,
+          deadline: new Date(), // Current deadline or next installment
+          daysUntilDeadline: student.daysOverdue > 0 ? -student.daysOverdue : 0,
+        };
+
+        // Send SMS reminder
+        const success = await sendDeadlineReminderSMS(reminderData);
+
+        if (success) {
+          console.log(
+            `Reminder sent successfully to ${student.guardianPhone} for ${student.name}`,
+          );
+        } else {
+          console.error(`Failed to send reminder to ${student.guardianPhone}`);
+        }
+
+        return success;
+      } catch (error) {
+        console.error(`Error sending reminder to student ${studentId}:`, error);
+        return false;
+      }
+    },
+    [allStudents],
+  );
+
+  const sendBulkReminders = useCallback(
+    async (studentIds: string[]): Promise<{ sent: number; failed: number }> => {
+      let sent = 0;
+      let failed = 0;
+
+      // Process in batches to avoid rate limiting
+      const batchSize = 10;
+      for (let i = 0; i < studentIds.length; i += batchSize) {
+        const batch = studentIds.slice(i, i + batchSize);
+        const results = await Promise.allSettled(
+          batch.map((id) => sendReminder(id)),
+        );
+
+        results.forEach((result) => {
+          if (result.status === "fulfilled" && result.value) {
+            sent++;
+          } else {
+            failed++;
+          }
+        });
+
+        // Small delay between batches to avoid rate limiting
+        if (i + batchSize < studentIds.length) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      }
+
+      console.log(`Bulk reminders complete: ${sent} sent, ${failed} failed`);
+      return { sent, failed };
+    },
+    [sendReminder],
+  );
 
   return {
     students: paginatedStudents,

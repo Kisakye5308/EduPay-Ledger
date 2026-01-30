@@ -1,18 +1,28 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Card, CardTitle } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Avatar } from '@/components/ui/Avatar';
-import { PaymentStatusBadge, Badge } from '@/components/ui/Badge';
-import { Table, Pagination } from '@/components/ui/Table';
-import { Modal } from '@/components/ui/Modal';
-import { Input, Select } from '@/components/ui/Input';
-import { formatUGX } from '@/lib/utils';
-import { useFirebaseStudents } from '@/hooks/useFirebaseData';
-import type { StudentListItem } from '@/hooks/useStudents';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Card, CardTitle } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Avatar } from "@/components/ui/Avatar";
+import { PaymentStatusBadge, Badge } from "@/components/ui/Badge";
+import { Table, Pagination } from "@/components/ui/Table";
+import { Modal } from "@/components/ui/Modal";
+import { Input, Select } from "@/components/ui/Input";
+import { formatUGX } from "@/lib/utils";
+import { useFirebaseStudents } from "@/hooks/useFirebaseData";
+import { useToast } from "@/components/ui/Toast";
+import {
+  exportStudentsToCSV,
+  exportStudentsToPDF,
+  exportStudentsToExcel,
+} from "@/lib/services/export.service";
+import {
+  createStudent,
+  type CreateStudentInput,
+} from "@/lib/services/student.service";
+import type { StudentListItem } from "@/hooks/useStudents";
 
 // ============================================================================
 // SUB-COMPONENTS
@@ -28,21 +38,37 @@ interface StatsCardProps {
   trendUp?: boolean;
 }
 
-function StatsCard({ title, value, icon, iconBg, iconColor, trend, trendUp }: StatsCardProps) {
+function StatsCard({
+  title,
+  value,
+  icon,
+  iconBg,
+  iconColor,
+  trend,
+  trendUp,
+}: StatsCardProps) {
   return (
     <Card className="relative overflow-hidden">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">{title}</p>
-          <p className="text-2xl font-bold text-primary dark:text-white mt-1">{value}</p>
+          <p className="text-xs font-medium text-slate-500 uppercase tracking-wider">
+            {title}
+          </p>
+          <p className="text-2xl font-bold text-primary dark:text-white mt-1">
+            {value}
+          </p>
           {trend && (
-            <p className={`text-xs mt-2 ${trendUp ? 'text-emerald-600' : 'text-red-600'}`}>
+            <p
+              className={`text-xs mt-2 ${trendUp ? "text-emerald-600" : "text-red-600"}`}
+            >
               {trend}
             </p>
           )}
         </div>
         <div className={`p-3 rounded-xl ${iconBg}`}>
-          <span className={`material-symbols-outlined text-xl ${iconColor}`}>{icon}</span>
+          <span className={`material-symbols-outlined text-xl ${iconColor}`}>
+            {icon}
+          </span>
         </div>
       </div>
     </Card>
@@ -57,7 +83,13 @@ interface FilterDropdownProps {
   icon?: string;
 }
 
-function FilterDropdown({ label, value, options, onChange, icon }: FilterDropdownProps) {
+function FilterDropdown({
+  label,
+  value,
+  options,
+  onChange,
+  icon,
+}: FilterDropdownProps) {
   return (
     <div className="relative">
       <label className="text-xs font-medium text-slate-500 uppercase tracking-wider block mb-1">
@@ -72,10 +104,12 @@ function FilterDropdown({ label, value, options, onChange, icon }: FilterDropdow
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full h-10 ${icon ? 'pl-9' : 'pl-3'} pr-8 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary focus:border-primary appearance-none cursor-pointer`}
+          className={`w-full h-10 ${icon ? "pl-9" : "pl-3"} pr-8 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300 focus:ring-2 focus:ring-primary focus:border-primary appearance-none cursor-pointer`}
         >
-          {options.map(opt => (
-            <option key={opt} value={opt}>{opt}</option>
+          {options.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
           ))}
         </select>
         <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">
@@ -93,26 +127,74 @@ function FilterDropdown({ label, value, options, onChange, icon }: FilterDropdow
 interface AddStudentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  schoolId?: string;
+  onSuccess?: (studentName: string) => void;
 }
 
-function AddStudentModal({ isOpen, onClose }: AddStudentModalProps) {
+function AddStudentModal({
+  isOpen,
+  onClose,
+  schoolId = "school-001",
+  onSuccess,
+}: AddStudentModalProps) {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    middleName: '',
-    gender: 'male',
-    className: '',
-    streamName: '',
-    guardianName: '',
-    guardianPhone: '',
-    guardianRelationship: 'parent',
+    firstName: "",
+    lastName: "",
+    middleName: "",
+    gender: "male",
+    className: "",
+    streamName: "",
+    guardianName: "",
+    guardianPhone: "",
+    guardianRelationship: "parent",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement student creation with Firebase
-    console.log('Creating student:', formData);
-    onClose();
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const studentInput: CreateStudentInput = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        middleName: formData.middleName || undefined,
+        gender: formData.gender as "male" | "female",
+        schoolId: schoolId,
+        classId: formData.className,
+        className: formData.className,
+        streamId: formData.streamName || undefined,
+        streamName: formData.streamName || undefined,
+        academicYear: new Date().getFullYear().toString(),
+        term: "Term 1",
+        guardian: {
+          name: formData.guardianName,
+          phone: formData.guardianPhone,
+          relationship: formData.guardianRelationship as
+            | "parent"
+            | "guardian"
+            | "other",
+        },
+        feeStructureId: `fee-${formData.className}-2026`,
+      };
+
+      const result = await createStudent(studentInput);
+
+      if (result.success) {
+        onClose();
+        onSuccess?.(`${formData.firstName} ${formData.lastName}`);
+      } else {
+        setSubmitError(result.error || "Failed to create student");
+      }
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error ? error.message : "An error occurred",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -128,18 +210,24 @@ function AddStudentModal({ isOpen, onClose }: AddStudentModalProps) {
             <Input
               label="First Name"
               value={formData.firstName}
-              onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, firstName: e.target.value }))
+              }
               required
             />
             <Input
               label="Middle Name"
               value={formData.middleName}
-              onChange={(e) => setFormData(prev => ({ ...prev, middleName: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, middleName: e.target.value }))
+              }
             />
             <Input
               label="Last Name"
               value={formData.lastName}
-              onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, lastName: e.target.value }))
+              }
               required
             />
           </div>
@@ -147,46 +235,52 @@ function AddStudentModal({ isOpen, onClose }: AddStudentModalProps) {
             <Select
               label="Gender"
               value={formData.gender}
-              onChange={(e) => setFormData(prev => ({ ...prev, gender: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, gender: e.target.value }))
+              }
               options={[
-                { value: 'male', label: 'Male' },
-                { value: 'female', label: 'Female' },
+                { value: "male", label: "Male" },
+                { value: "female", label: "Female" },
               ]}
             />
             <Select
               label="Class"
               value={formData.className}
-              onChange={(e) => setFormData(prev => ({ ...prev, className: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, className: e.target.value }))
+              }
               options={[
-                { value: '', label: 'Select Class' },
-                { value: 'P.1', label: 'Primary 1' },
-                { value: 'P.2', label: 'Primary 2' },
-                { value: 'P.3', label: 'Primary 3' },
-                { value: 'P.4', label: 'Primary 4' },
-                { value: 'P.5', label: 'Primary 5' },
-                { value: 'P.6', label: 'Primary 6' },
-                { value: 'P.7', label: 'Primary 7' },
-                { value: 'S.1', label: 'Senior 1' },
-                { value: 'S.2', label: 'Senior 2' },
-                { value: 'S.3', label: 'Senior 3' },
-                { value: 'S.4', label: 'Senior 4' },
-                { value: 'S.5', label: 'Senior 5' },
-                { value: 'S.6', label: 'Senior 6' },
+                { value: "", label: "Select Class" },
+                { value: "P.1", label: "Primary 1" },
+                { value: "P.2", label: "Primary 2" },
+                { value: "P.3", label: "Primary 3" },
+                { value: "P.4", label: "Primary 4" },
+                { value: "P.5", label: "Primary 5" },
+                { value: "P.6", label: "Primary 6" },
+                { value: "P.7", label: "Primary 7" },
+                { value: "S.1", label: "Senior 1" },
+                { value: "S.2", label: "Senior 2" },
+                { value: "S.3", label: "Senior 3" },
+                { value: "S.4", label: "Senior 4" },
+                { value: "S.5", label: "Senior 5" },
+                { value: "S.6", label: "Senior 6" },
               ]}
               required
             />
             <Select
               label="Stream"
               value={formData.streamName}
-              onChange={(e) => setFormData(prev => ({ ...prev, streamName: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, streamName: e.target.value }))
+              }
               options={[
-                { value: '', label: 'Select Stream' },
-                { value: 'Blue', label: 'Blue' },
-                { value: 'Red', label: 'Red' },
-                { value: 'Green', label: 'Green' },
-                { value: 'Yellow', label: 'Yellow' },
-                { value: 'East', label: 'East' },
-                { value: 'West', label: 'West' },
+                { value: "", label: "Select Stream" },
+                { value: "Blue", label: "Blue" },
+                { value: "Red", label: "Red" },
+                { value: "Green", label: "Green" },
+                { value: "Yellow", label: "Yellow" },
+                { value: "East", label: "East" },
+                { value: "West", label: "West" },
               ]}
             />
           </div>
@@ -195,20 +289,32 @@ function AddStudentModal({ isOpen, onClose }: AddStudentModalProps) {
         {/* Guardian Information */}
         <div>
           <h3 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-2">
-            <span className="material-symbols-outlined text-sm">family_restroom</span>
+            <span className="material-symbols-outlined text-sm">
+              family_restroom
+            </span>
             Guardian Information
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="Guardian Name"
               value={formData.guardianName}
-              onChange={(e) => setFormData(prev => ({ ...prev, guardianName: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  guardianName: e.target.value,
+                }))
+              }
               required
             />
             <Input
               label="Guardian Phone"
               value={formData.guardianPhone}
-              onChange={(e) => setFormData(prev => ({ ...prev, guardianPhone: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  guardianPhone: e.target.value,
+                }))
+              }
               placeholder="+256..."
               required
             />
@@ -217,25 +323,52 @@ function AddStudentModal({ isOpen, onClose }: AddStudentModalProps) {
             <Select
               label="Relationship"
               value={formData.guardianRelationship}
-              onChange={(e) => setFormData(prev => ({ ...prev, guardianRelationship: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  guardianRelationship: e.target.value,
+                }))
+              }
               options={[
-                { value: 'father', label: 'Father' },
-                { value: 'mother', label: 'Mother' },
-                { value: 'guardian', label: 'Guardian' },
-                { value: 'other', label: 'Other' },
+                { value: "father", label: "Father" },
+                { value: "mother", label: "Mother" },
+                { value: "guardian", label: "Guardian" },
+                { value: "other", label: "Other" },
               ]}
             />
           </div>
         </div>
 
+        {/* Error Display */}
+        {submitError && (
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600 flex items-center gap-2">
+              <span className="material-symbols-outlined text-sm">error</span>
+              {submitError}
+            </p>
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-          <Button variant="outline" type="button" onClick={onClose}>
+          <Button
+            variant="outline"
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
-          <Button variant="primary" type="submit">
-            <span className="material-symbols-outlined text-sm mr-2">person_add</span>
-            Add Student
+          <Button
+            variant="primary"
+            type="submit"
+            loading={isSubmitting}
+            disabled={isSubmitting}
+          >
+            <span className="material-symbols-outlined text-sm mr-2">
+              person_add
+            </span>
+            {isSubmitting ? "Adding..." : "Add Student"}
           </Button>
         </div>
       </form>
@@ -250,7 +383,8 @@ function AddStudentModal({ isOpen, onClose }: AddStudentModalProps) {
 export default function StudentsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const showAddModal = searchParams.get('action') === 'add';
+  const { success, error: showError } = useToast();
+  const showAddModal = searchParams.get("action") === "add";
 
   const {
     students,
@@ -272,12 +406,12 @@ export default function StudentsPage() {
   } = useFirebaseStudents({ pageSize: 10 });
 
   const [showExportModal, setShowExportModal] = useState(false);
-  const [searchInput, setSearchInput] = useState('');
+  const [searchInput, setSearchInput] = useState("");
 
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [authLoading, isAuthenticated, router]);
 
@@ -291,10 +425,51 @@ export default function StudentsPage() {
     return () => clearTimeout(timeoutId);
   };
 
-  const handleExport = (format: 'csv' | 'pdf' | 'excel') => {
-    // TODO: Implement export
-    console.log(`Exporting as ${format}`);
-    setShowExportModal(false);
+  const handleExport = async (format: "csv" | "pdf" | "excel") => {
+    try {
+      const studentsForExport = students.map((s) => ({
+        ...s,
+        middleName: "",
+        guardian: {
+          name: s.guardianName,
+          phone: s.guardianPhone,
+          relationship: "parent" as const,
+        },
+      }));
+
+      switch (format) {
+        case "csv":
+          exportStudentsToCSV(
+            studentsForExport as any,
+            `students_${new Date().toISOString().split("T")[0]}`,
+          );
+          break;
+        case "pdf":
+          exportStudentsToPDF(
+            studentsForExport as any,
+            `students_${new Date().toISOString().split("T")[0]}`,
+          );
+          break;
+        case "excel":
+          exportStudentsToExcel(
+            studentsForExport as any,
+            `students_${new Date().toISOString().split("T")[0]}`,
+          );
+          break;
+      }
+      success(
+        "Export Complete",
+        `Students exported to ${format.toUpperCase()}`,
+      );
+    } catch (error) {
+      console.error("Export failed:", error);
+      showError(
+        "Export Failed",
+        "Could not export students. Please try again.",
+      );
+    } finally {
+      setShowExportModal(false);
+    }
   };
 
   const handleRowClick = (student: StudentListItem) => {
@@ -302,20 +477,25 @@ export default function StudentsPage() {
   };
 
   const closeAddModal = () => {
-    router.push('/students');
+    router.push("/students");
+  };
+
+  const handleStudentAdded = (studentName: string) => {
+    success("Student Added", `${studentName} has been enrolled successfully`);
+    refresh();
   };
 
   // Table columns
   const columns = [
     {
-      key: 'name',
-      header: 'Student Name & ID',
+      key: "name",
+      header: "Student Name & ID",
       render: (student: StudentListItem) => (
         <div className="flex items-center gap-3">
-          <Avatar 
-            name={`${student.firstName} ${student.lastName}`} 
+          <Avatar
+            name={`${student.firstName} ${student.lastName}`}
             src={student.photo}
-            size="md" 
+            size="md"
           />
           <div className="flex flex-col">
             <span className="text-sm font-bold text-gray-900 dark:text-white">
@@ -329,8 +509,8 @@ export default function StudentsPage() {
       ),
     },
     {
-      key: 'class',
-      header: 'Class / Stream',
+      key: "class",
+      header: "Class / Stream",
       render: (student: StudentListItem) => (
         <div className="flex gap-2">
           <Badge variant="default">{student.className}</Badge>
@@ -341,47 +521,51 @@ export default function StudentsPage() {
       ),
     },
     {
-      key: 'guardian',
-      header: 'Guardian',
+      key: "guardian",
+      header: "Guardian",
       render: (student: StudentListItem) => (
         <div className="flex flex-col">
           <span className="text-sm text-slate-700 dark:text-slate-300">
             {student.guardianName}
           </span>
-          <span className="text-xs text-slate-500">{student.guardianPhone}</span>
+          <span className="text-xs text-slate-500">
+            {student.guardianPhone}
+          </span>
         </div>
       ),
     },
     {
-      key: 'status',
-      header: 'Payment Status',
+      key: "status",
+      header: "Payment Status",
       render: (student: StudentListItem) => (
         <PaymentStatusBadge status={student.paymentStatus} />
       ),
     },
     {
-      key: 'balance',
-      header: 'Outstanding Balance',
-      align: 'right' as const,
+      key: "balance",
+      header: "Outstanding Balance",
+      align: "right" as const,
       render: (student: StudentListItem) => (
-        <span className={`font-mono text-sm font-bold ${
-          student.balance > 0 && student.paymentStatus === 'overdue' 
-            ? 'text-red-600' 
-            : student.balance === 0
-            ? 'text-emerald-600'
-            : 'text-gray-900 dark:text-white'
-        }`}>
+        <span
+          className={`font-mono text-sm font-bold ${
+            student.balance > 0 && student.paymentStatus === "overdue"
+              ? "text-red-600"
+              : student.balance === 0
+                ? "text-emerald-600"
+                : "text-gray-900 dark:text-white"
+          }`}
+        >
           {formatUGX(student.balance)}
         </span>
       ),
     },
     {
-      key: 'actions',
-      header: 'Actions',
-      align: 'right' as const,
+      key: "actions",
+      header: "Actions",
+      align: "right" as const,
       render: (student: StudentListItem) => (
         <div className="flex items-center justify-end gap-2">
-          <Link 
+          <Link
             href={`/payments/record?studentId=${student.id}`}
             className="p-2 text-primary hover:bg-primary/10 rounded-lg transition-colors"
             onClick={(e) => e.stopPropagation()}
@@ -389,7 +573,7 @@ export default function StudentsPage() {
           >
             <span className="material-symbols-outlined text-sm">add_card</span>
           </Link>
-          <Link 
+          <Link
             href={`/students/${student.id}`}
             className="text-primary dark:text-blue-400 text-sm font-bold hover:underline"
             onClick={(e) => e.stopPropagation()}
@@ -408,8 +592,11 @@ export default function StudentsPage() {
         <div className="animate-pulse space-y-6">
           <div className="h-10 bg-slate-200 dark:bg-slate-700 rounded w-1/3"></div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="h-24 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-24 bg-slate-200 dark:bg-slate-700 rounded-xl"
+              ></div>
             ))}
           </div>
           <div className="h-96 bg-slate-200 dark:bg-slate-700 rounded-xl"></div>
@@ -423,7 +610,9 @@ export default function StudentsPage() {
     return (
       <div className="p-4 lg:p-8 bg-background-light dark:bg-background-dark min-h-full">
         <Card className="text-center py-12">
-          <span className="material-symbols-outlined text-5xl text-red-500 mb-4">error</span>
+          <span className="material-symbols-outlined text-5xl text-red-500 mb-4">
+            error
+          </span>
           <h2 className="text-xl font-bold text-primary dark:text-white mb-2">
             Failed to Load Students
           </h2>
@@ -450,24 +639,28 @@ export default function StudentsPage() {
           </p>
         </div>
         <div className="flex gap-3">
-          <Button
-            variant="ghost"
-            onClick={refresh}
-            className="text-slate-600"
-          >
+          <Button variant="ghost" onClick={refresh} className="text-slate-600">
             <span className="material-symbols-outlined text-lg">refresh</span>
           </Button>
           <Button
             variant="outline"
             onClick={() => setShowExportModal(true)}
-            icon={<span className="material-symbols-outlined text-lg">download</span>}
+            icon={
+              <span className="material-symbols-outlined text-lg">
+                download
+              </span>
+            }
           >
             Export
           </Button>
           <Link href="/students?action=add">
             <Button
               variant="primary"
-              icon={<span className="material-symbols-outlined text-lg">person_add</span>}
+              icon={
+                <span className="material-symbols-outlined text-lg">
+                  person_add
+                </span>
+              }
             >
               Add Student
             </Button>
@@ -506,7 +699,11 @@ export default function StudentsPage() {
           icon="warning"
           iconBg="bg-red-100 dark:bg-red-900/30"
           iconColor="text-red-600"
-          trend={stats.noPaymentCount > 0 ? `${stats.noPaymentCount} no payment` : undefined}
+          trend={
+            stats.noPaymentCount > 0
+              ? `${stats.noPaymentCount} no payment`
+              : undefined
+          }
           trendUp={false}
         />
       </div>
@@ -552,14 +749,20 @@ export default function StudentsPage() {
             <FilterDropdown
               label="Status"
               value={filters.paymentStatus}
-              options={['All', 'fully_paid', 'partial', 'overdue', 'no_payment']}
+              options={[
+                "All",
+                "fully_paid",
+                "partial",
+                "overdue",
+                "no_payment",
+              ]}
               onChange={(value) => setFilters({ paymentStatus: value })}
               icon="filter_list"
             />
             <FilterDropdown
               label="Sort By"
               value={filters.sortBy}
-              options={['name', 'balance', 'className', 'lastPayment']}
+              options={["name", "balance", "className", "lastPayment"]}
               onChange={(value) => setFilters({ sortBy: value as any })}
               icon="sort"
             />
@@ -571,44 +774,62 @@ export default function StudentsPage() {
             onClick={resetFilters}
             className="text-slate-500 h-10"
           >
-            <span className="material-symbols-outlined text-sm mr-1">refresh</span>
+            <span className="material-symbols-outlined text-sm mr-1">
+              refresh
+            </span>
             Reset
           </Button>
         </div>
 
         {/* Active Filters Display */}
-        {(filters.className !== 'All' || filters.streamName !== 'All' || filters.paymentStatus !== 'All' || filters.search) && (
+        {(filters.className !== "All" ||
+          filters.streamName !== "All" ||
+          filters.paymentStatus !== "All" ||
+          filters.search) && (
           <div className="flex flex-wrap items-center gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
             <span className="text-xs text-slate-500">Active filters:</span>
             {filters.search && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
                 Search: "{filters.search}"
-                <button onClick={() => { setFilters({ search: '' }); setSearchInput(''); }}>
-                  <span className="material-symbols-outlined text-xs">close</span>
+                <button
+                  onClick={() => {
+                    setFilters({ search: "" });
+                    setSearchInput("");
+                  }}
+                >
+                  <span className="material-symbols-outlined text-xs">
+                    close
+                  </span>
                 </button>
               </span>
             )}
-            {filters.className !== 'All' && (
+            {filters.className !== "All" && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
                 Class: {filters.className}
-                <button onClick={() => setFilters({ className: 'All' })}>
-                  <span className="material-symbols-outlined text-xs">close</span>
+                <button onClick={() => setFilters({ className: "All" })}>
+                  <span className="material-symbols-outlined text-xs">
+                    close
+                  </span>
                 </button>
               </span>
             )}
-            {filters.streamName !== 'All' && (
+            {filters.streamName !== "All" && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
                 Stream: {filters.streamName}
-                <button onClick={() => setFilters({ streamName: 'All' })}>
-                  <span className="material-symbols-outlined text-xs">close</span>
+                <button onClick={() => setFilters({ streamName: "All" })}>
+                  <span className="material-symbols-outlined text-xs">
+                    close
+                  </span>
                 </button>
               </span>
             )}
-            {filters.paymentStatus !== 'All' && (
+            {filters.paymentStatus !== "All" && (
               <span className="inline-flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                Status: {filters.paymentStatus.replace('_', ' ')}
-                <button onClick={() => setFilters({ paymentStatus: 'All' })}>
-                  <span className="material-symbols-outlined text-xs">close</span>
+                Status: {filters.paymentStatus.replace("_", " ")}
+                <button onClick={() => setFilters({ paymentStatus: "All" })}>
+                  <span className="material-symbols-outlined text-xs">
+                    close
+                  </span>
                 </button>
               </span>
             )}
@@ -623,12 +844,16 @@ export default function StudentsPage() {
         </p>
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setFilters({ sortOrder: filters.sortOrder === 'asc' ? 'desc' : 'asc' })}
+            onClick={() =>
+              setFilters({
+                sortOrder: filters.sortOrder === "asc" ? "desc" : "asc",
+              })
+            }
             className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
-            title={`Sort ${filters.sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+            title={`Sort ${filters.sortOrder === "asc" ? "descending" : "ascending"}`}
           >
             <span className="material-symbols-outlined text-slate-500">
-              {filters.sortOrder === 'asc' ? 'arrow_upward' : 'arrow_downward'}
+              {filters.sortOrder === "asc" ? "arrow_upward" : "arrow_downward"}
             </span>
           </button>
         </div>
@@ -637,7 +862,9 @@ export default function StudentsPage() {
       {/* Students Table */}
       {students.length === 0 ? (
         <Card className="text-center py-12">
-          <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">search_off</span>
+          <span className="material-symbols-outlined text-5xl text-slate-300 mb-4">
+            search_off
+          </span>
           <h3 className="text-lg font-bold text-slate-700 dark:text-slate-300 mb-2">
             No Students Found
           </h3>
@@ -676,29 +903,49 @@ export default function StudentsPage() {
       <Card className="mt-6">
         <div className="flex flex-wrap justify-center gap-8 text-center">
           <div>
-            <p className="text-2xl font-bold text-emerald-600">{stats.fullyPaidCount}</p>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">Fully Paid</p>
+            <p className="text-2xl font-bold text-emerald-600">
+              {stats.fullyPaidCount}
+            </p>
+            <p className="text-xs text-slate-500 uppercase tracking-wider">
+              Fully Paid
+            </p>
           </div>
           <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
           <div>
-            <p className="text-2xl font-bold text-blue-600">{stats.partialCount}</p>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">Partial</p>
+            <p className="text-2xl font-bold text-blue-600">
+              {stats.partialCount}
+            </p>
+            <p className="text-xs text-slate-500 uppercase tracking-wider">
+              Partial
+            </p>
           </div>
           <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
           <div>
-            <p className="text-2xl font-bold text-red-600">{stats.overdueCount}</p>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">Overdue</p>
+            <p className="text-2xl font-bold text-red-600">
+              {stats.overdueCount}
+            </p>
+            <p className="text-xs text-slate-500 uppercase tracking-wider">
+              Overdue
+            </p>
           </div>
           <div className="w-px bg-slate-200 dark:bg-slate-700"></div>
           <div>
-            <p className="text-2xl font-bold text-slate-600">{stats.noPaymentCount}</p>
-            <p className="text-xs text-slate-500 uppercase tracking-wider">No Payment</p>
+            <p className="text-2xl font-bold text-slate-600">
+              {stats.noPaymentCount}
+            </p>
+            <p className="text-xs text-slate-500 uppercase tracking-wider">
+              No Payment
+            </p>
           </div>
         </div>
       </Card>
 
       {/* Add Student Modal */}
-      <AddStudentModal isOpen={showAddModal} onClose={closeAddModal} />
+      <AddStudentModal
+        isOpen={showAddModal}
+        onClose={closeAddModal}
+        onSuccess={handleStudentAdded}
+      />
 
       {/* Export Modal */}
       <Modal
@@ -715,28 +962,34 @@ export default function StudentsPage() {
             <Button
               variant="outline"
               fullWidth
-              onClick={() => handleExport('csv')}
+              onClick={() => handleExport("csv")}
               className="justify-start"
             >
-              <span className="material-symbols-outlined mr-3 text-green-500">table_chart</span>
+              <span className="material-symbols-outlined mr-3 text-green-500">
+                table_chart
+              </span>
               Export as CSV
             </Button>
             <Button
               variant="outline"
               fullWidth
-              onClick={() => handleExport('pdf')}
+              onClick={() => handleExport("pdf")}
               className="justify-start"
             >
-              <span className="material-symbols-outlined mr-3 text-red-500">picture_as_pdf</span>
+              <span className="material-symbols-outlined mr-3 text-red-500">
+                picture_as_pdf
+              </span>
               Export as PDF
             </Button>
             <Button
               variant="outline"
               fullWidth
-              onClick={() => handleExport('excel')}
+              onClick={() => handleExport("excel")}
               className="justify-start"
             >
-              <span className="material-symbols-outlined mr-3 text-emerald-600">grid_on</span>
+              <span className="material-symbols-outlined mr-3 text-emerald-600">
+                grid_on
+              </span>
               Export as Excel
             </Button>
           </div>
